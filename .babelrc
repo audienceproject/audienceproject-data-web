@@ -1,0 +1,14 @@
+{
+  "moduleId": "AudienceProjectDataWeb",
+
+  "presets": [
+    ["@babel/preset-env", {
+      "modules": "umd",
+      "loose": true
+    }]
+  ],
+
+  "plugins": [
+    "add-module-exports"
+  ]
+}

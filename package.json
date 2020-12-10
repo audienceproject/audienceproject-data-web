@@ -1,0 +1,43 @@
+{
+  "name": "@apr/data-web",
+  "version": "1.0.0",
+  "description": "AudienceProject Data services for your websites",
+  "main": "dist/audienceproject-data-web.js",
+  "type": "module",
+  "exports": {
+    "import": "./audienceproject-data-web.js",
+    "require": "./dist/audienceproject-data-web.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/audienceproject/audienceproject-data-web.git"
+  },
+  "author": "AudienceProject",
+  "license": "Apache-2.0",
+  "scripts": {
+    "lint": "eslint .",
+    "test": "ava --verbose",
+    "build": "babel --out-file dist/audienceproject-data-web.js audienceproject-data-web.js",
+    "compress": "uglifyjs --compress --mangle --output dist/audienceproject-data-web.min.js dist/audienceproject-data-web.js",
+    "prepublishOnly": "npm run lint && npm run test && npm run build && npm run compress",
+    "watch:build": "nodemon --quiet --on-change-only --watch audienceproject-data-web.js --exec 'npm run build && npm run compress'",
+    "watch:test": "nodemon --quiet --on-change-only --watch test.js --exec 'npm run test'",
+    "serve": "http-server --silent --no-dotfiles -c-1",
+    "dev": "npm run prepublishOnly && (npm run watch:test & npm run watch:build & npm run serve)"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.12.10",
+    "@babel/core": "^7.12.10",
+    "@babel/preset-env": "^7.12.10",
+    "ava": "^3.14.0",
+    "babel-plugin-add-module-exports": "^1.0.4",
+    "es6-promise": "^4.2.8",
+    "eslint": "^7.15.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-compat": "^3.8.0",
+    "eslint-plugin-import": "^2.22.1",
+    "http-server": "^0.12.3",
+    "nodemon": "^2.0.6",
+    "uglify-js": "^3.12.1"
+  }
+}

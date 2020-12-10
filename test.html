@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+
+<script src="http://localhost:8080/node_modules/es6-promise/dist/es6-promise.auto.js"></script>
+<script src="dist/audienceproject-data-web.js"></script>
+
+<script>
+    window.__tcfapi = function (command, version, callback, arguments) {
+    console.log('[Test Page] TCF 2.0 call:', command, arguments);
+
+    if (command === 'getTCData') {
+      callback({
+        gdprApplies: true,
+        tcString: ''
+      }, true);
+    } else
+
+    if (command === 'addEventListener') {
+      callback({
+        gdprApplies: true,
+        tcString: 'abc',
+        purpose: {
+          consents: {
+            1: true,
+            3: true
+          }
+        },
+        vendors: {
+          consents: {
+            394: true
+          }
+        }
+      }, true);
+    }
+  };
+</script>
+
+<script>
+  AudienceProjectDataWeb.fetch('test', { debug: true })
+    .then(function (data) {
+      console.log('[Test Page] Success:', data);
+    })
+    .catch(function (error) {
+      console.log('[Test Page] Error:', error);
+    });
+</script>

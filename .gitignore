@@ -1,0 +1,10 @@
+# node modules
+node_modules/
+
+# lock files
+package-lock.json
+yarn.lock
+
+# build files
+dist/audienceproject-data-web.js
+dist/audienceproject-data-web.min.js

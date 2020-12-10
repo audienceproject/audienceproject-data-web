@@ -1,0 +1,9 @@
+# ignore all
+**
+
+# whitelist files
+!README.md
+!package.json
+!audienceproject-data-web.js
+!dist/audienceproject-data-web.js
+!dist/audienceproject-data-web.min.js
