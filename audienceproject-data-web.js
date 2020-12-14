@@ -53,7 +53,19 @@ export const fetch = ( // eslint-disable-line import/prefer-default-export
     }
   };
 
-  const cacheKey = options.cacheKey.split(',').sort().map((key) => {
+  const getHash = (data) => {
+    let hash = 0;
+
+    const { length } = data;
+    for (let index = 0; index < length; index += 1) {
+      hash = ((hash << 5) - hash) + data.charCodeAt(index); // eslint-disable-line no-bitwise
+      hash &= hash; // eslint-disable-line no-bitwise
+    }
+
+    return hash;
+  };
+
+  const cacheKey = getHash(options.cacheKey.split(',').sort().map((key) => {
     if (key === 'url') {
       return window.location.pathname.slice(1) + window.location.search;
     }
@@ -65,7 +77,7 @@ export const fetch = ( // eslint-disable-line import/prefer-default-export
       return string === '{}' ? '' : string;
     }
     return '';
-  }).join('');
+  }).join(''));
 
   const storage = localStorage;
 
@@ -217,7 +229,7 @@ export const fetch = ( // eslint-disable-line import/prefer-default-export
       return reject();
     }
 
-    if (value.ttl > currentTimestamp || value.hash !== cacheKey) {
+    if (value.ttl < currentTimestamp || value.hash !== cacheKey) {
       debugInfo('Cached prediction expired…');
       return reject();
     }
