@@ -284,7 +284,7 @@ export const fetch = ( // eslint-disable-line import/prefer-default-export
 
     data.keyValues = data.keyValues || {}; // eslint-disable-line no-param-reassign
 
-    const personalisationSuffix = statusCode > 0 && options.allowPersonalisation ? 'a' : '';
+    const personalisationSuffix = statusCode > 0 && options.allowPersonalisation ? '' : 'a';
     data.keyValues.ap_ds = `${statusCode}${personalisationSuffix}`; // eslint-disable-line no-param-reassign
   };
 
