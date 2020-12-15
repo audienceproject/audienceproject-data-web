@@ -5,6 +5,7 @@ const cacheMemory = {};
 export const fetch = ( // eslint-disable-line import/prefer-default-export
   customerId,
   _options = {},
+  callback,
 ) => {
   if (typeof customerId !== 'string') {
     throw new Error('Invalid customer ID');
@@ -114,7 +115,7 @@ export const fetch = ( // eslint-disable-line import/prefer-default-export
     } catch (error) {} // eslint-disable-line no-empty
   };
 
-  const useCmp = () => new Promise((resolve) => {
+  const useCmp = (resolve) => {
     if (!options.integrateWithCmp) {
       resolve();
       return;
@@ -147,14 +148,14 @@ export const fetch = ( // eslint-disable-line import/prefer-default-export
       debugInfo('Options after CMP override:', options);
     };
 
-    const callTcf = (event, callback) => {
+    const callTcf = (event, handler) => {
       const versionId = 2;
       const vendorIds = [vendorId];
       __tcfapi( // eslint-disable-line no-undef
         event, versionId, (...args) => {
           debugInfo('TCF response:', ...args);
 
-          callback(...args);
+          handler(...args);
         }, vendorIds,
       );
     };
@@ -180,16 +181,16 @@ export const fetch = ( // eslint-disable-line import/prefer-default-export
     };
 
     callTcf('getTCData', listenResponse);
-  });
+  };
 
-  const useTimeout = (callback) => {
+  const useTimeout = (resolve) => {
     if (!options.timeout) {
-      return;
+      return undefined;
     }
 
     debugInfo('Starting reject timeout…');
 
-    setTimeout(callback, options.timeout);
+    return setTimeout(resolve, options.timeout);
   };
 
   const checkSessionReferrer = () => {
@@ -208,7 +209,7 @@ export const fetch = ( // eslint-disable-line import/prefer-default-export
 
   const currentTimestamp = Math.round(new Date().getTime() / 1000);
 
-  const readDataFromCache = () => new Promise((resolve, reject) => {
+  const readDataFromCache = (resolve, reject) => {
     if (!options.cacheType) {
       return reject();
     }
@@ -236,7 +237,7 @@ export const fetch = ( // eslint-disable-line import/prefer-default-export
 
     debugInfo('Cached prediction:', value.data);
     return resolve(value.data);
-  });
+  };
 
   const saveDataToCache = (value) => {
     if (!options.cacheType) {
@@ -287,7 +288,7 @@ export const fetch = ( // eslint-disable-line import/prefer-default-export
     data.keyValues.ap_ds = `${statusCode}${personalisationSuffix}`; // eslint-disable-line no-param-reassign
   };
 
-  const fetchJSON = (url) => new Promise((resolve, reject) => {
+  const fetchJSON = (url, resolve, reject) => {
     debugInfo('Fetching URL:', url);
 
     const ajax = new XMLHttpRequest();
@@ -309,9 +310,9 @@ export const fetch = ( // eslint-disable-line import/prefer-default-export
     ajax.open('GET', url, true);
     ajax.withCredentials = options.allowPersonalisation;
     ajax.send();
-  });
+  };
 
-  const readDataFromWeb = () => {
+  const readDataFromWeb = (resolve, reject) => {
     debugInfo('Reading prediction from API…');
 
     const params = ['med', window.location.href]; // eslint-disable-line compat/compat
@@ -356,39 +357,57 @@ export const fetch = ( // eslint-disable-line import/prefer-default-export
       url += partPrefix + encodeURIComponent(param);
     });
 
-    return fetchJSON(url);
+    return fetchJSON(url, resolve, reject);
   };
 
   debugInfo('Running promise…');
 
-  return new Promise((resolve, reject) => {
+  const getData = (resolve, reject) => {
+    let timeout;
+    let dataUsed = false;
+
     const useData = (data, statusCode) => {
+      if (dataUsed) {
+        return;
+      }
+
+      dataUsed = true;
+      clearTimeout(timeout);
+
       addStatusField(data, statusCode);
       saveDataToGlobals(data);
 
       resolve(data);
     };
 
-    useCmp().then(() => { // FIXME: try read from cache and preconnect to api if cache hit is missed
-      useTimeout(() => {
+    useCmp(() => { // FIXME: try read from cache and preconnect to api if cache hit is missed
+      timeout = useTimeout(() => {
         useData({}, statusCodeTimeout);
       });
 
       checkSessionReferrer();
 
-      return readDataFromCache().then((data) => {
+      return readDataFromCache((data) => {
         useData(data, statusCodeCache);
-      }).catch(() => (
-        readDataFromWeb().then((data) => {
+      }, () => (
+        readDataFromWeb((data) => {
           saveDataToCache(data);
 
           useData(data, statusCodeWebSuccess);
-        }).catch(() => {
+        }, () => {
           useData({}, statusCodeWebError);
         })
       ));
-    }).catch(reject);
-  });
+    }, reject);
+  };
+
+  if (typeof callback === 'function') {
+    getData(callback);
+  }
+
+  return {
+    promise: () => new Promise(getData),
+  };
 };
 
 export default {

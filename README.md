@@ -40,8 +40,16 @@ AudienceProject Data services for your websites.
 
 ### Fetch AudienceProject Data
 
+With callback:
+
 ```javascript
-AudienceProjectDataWeb.fetch(customerId, options);
+AudienceProjectDataWeb.fetch(customerId, options, callback);
+```
+
+Promise based:
+
+```javascript
+AudienceProjectDataWeb.fetch(customerId, options).promise().then(/* callback */).catch(/* callback */);
 ```
 
 #### Arguments
@@ -63,11 +71,8 @@ AudienceProjectDataWeb.fetch(customerId, options);
 * `options.requestDomains={regular:'',nonPersonalised:''}` *(Object)*: Override request domains.
 * `options.requestParams={}` *(Object)*: Extra request params or information about user.
 * `options.debug=false` *(boolean)*: Enable debug logging.
-
-#### Returns
-
-* `(Promise)`
+* `callback` *(Function)*: Optional callback handler.
 
 ## Compatibility
 
-We are supporting all modern and legacy browsers starting with Internet Explorer 10, Firefox 3.6, Chrome 4. Only [Promise polyfill](https://github.com/stefanpenner/es6-promise) is required to work with Internet Explorer and legacy versions of Firefox/Chrome, see [compatibility table](https://caniuse.com/promises).
+We are supporting all modern and legacy browsers starting with Internet Explorer 10, Firefox 3.6, Chrome 4. [Promise polyfill](https://github.com/stefanpenner/es6-promise) is required if you want to use promise-based callback with Internet Explorer and legacy versions of Firefox/Chrome, see [compatibility table](https://caniuse.com/promises).

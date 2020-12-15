@@ -35,11 +35,14 @@
 </script>
 
 <script>
-  AudienceProjectDataWeb.fetch('test', { debug: true })
-    .then(function (data) {
-      console.log('[Test Page] Success:', data);
-    })
-    .catch(function (error) {
-      console.log('[Test Page] Error:', error);
-    });
+  const onSuccess = function (data) {
+    console.log('[Test Page] Success:', data);
+  };
+  const onError = function (error) {
+    console.log('[Test Page] Error:', error);
+  };
+
+  AudienceProjectDataWeb.fetch('test', { debug: true }).promise()
+    .then(onSuccess)
+    .catch(onError);
 </script>
