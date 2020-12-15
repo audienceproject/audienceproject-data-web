@@ -2,38 +2,92 @@ export const version = '1.0.0';
 
 const cacheMemory = {};
 
-export const fetch = ( // eslint-disable-line import/prefer-default-export
-  customerId,
-  _options = {},
-  callback,
-) => {
+/**
+ * Fetch AudienceProject Data
+ * @function
+ *
+ * @argument {string}   customerId
+ *                      Your AudienceProject customer ID.
+ *
+ * @argument {Object}   [options]
+ *                      Optional options.
+ *
+ * @argument {boolean}  [options.allowStorageAccess=true]
+ *                      If we can read or write to *localStorage*.
+ * @argument {boolean}  [options.allowPersonalisation=true]
+ *                      If we can use personalisation for user (read cookies and user identifiers).
+ *
+ * @argument {boolean}  [options.gdprApplies=null]
+ *                      If GDPR applies to user.
+ * @argument {string}   [options.consentString='']
+ *                      Consent string to prediction requests.
+ *
+ * @argument {boolean}  [options.integrateWithCmp=false]
+ *                      Should we integrate with CMP to override storage and personalisation access,
+ *                      GDPR status and consent string.
+ * @argument {boolean}  [options.waitForCmpConsent=false]
+ *                      Should we wait for explicit CMP consent before firing timeout.
+ *
+ * @argument {Object}   [options.requestParams={}]
+ *                      Extra request params or information about user.
+ *
+ * @argument {number}   [options.timeout=1000]
+ *                      Timeout in milliseconds when result needs to be returned since invocation.
+ *
+ * @argument {boolean}  [options.writeToGlobals=false]
+ *                      Should output be written to global variables *apDataKeyValues*,
+ *                      *apDataCustomAttributes* and *apDataAudiences*.
+ * @argument {boolean}  [options.addStatusField=false]
+ *                      Should status field be added into *keyValues* result.
+ *
+ * @argument {string}   [options.cacheType='']
+ *                      Type of cache, can be *localStorage* or *memory*.
+ * @argument {string}   [options.cacheKey='url,allowPersonalisation,requestParams']
+ *                      Comma separated list of cache key params.
+ * @argument {number}   [options.cacheTime=86400]
+ *                      Number of seconds response should be cached in case of *options.cacheType*
+ *                      is not empty.
+ *
+ * @argument {Object}   [options.requestDomains={regular:'',nonPersonalised:''}]
+ *                      Override request domains.
+ * @argument {boolean}  [options.debug=false]
+ *                      Enable debug logging.
+ * @argument {function} [callback]
+ *                      Optional callback handler
+ *
+ * @returns {Object}
+ */
+
+export const fetch = (customerId, _options, callback) => {
   if (typeof customerId !== 'string') {
     throw new Error('Invalid customer ID');
   }
 
   const options = {
-    timeout: 1000,
-
-    cacheType: '', // localStorage|memory
-    cacheKey: 'url,allowPersonalisation,requestParams',
-    cacheTime: 24 * 60 * 60,
-
     allowStorageAccess: true,
     allowPersonalisation: true,
 
     gdprApplies: null,
     consentString: '',
+
     integrateWithCmp: false,
     waitForCmpConsent: false,
 
+    requestParams: {},
+
+    timeout: 1 * 1000,
+
     writeToGlobals: false,
     addStatusField: false,
+
+    cacheType: '', // localStorage|memory
+    cacheKey: 'url,allowPersonalisation,requestParams',
+    cacheTime: 24 * 60 * 60,
 
     requestDomains: {
       regular: '',
       nonPersonalised: '',
     },
-    requestParams: {},
 
     debug: false,
 
@@ -380,7 +434,7 @@ export const fetch = ( // eslint-disable-line import/prefer-default-export
       resolve(data);
     };
 
-    useCmp(() => { // FIXME: try read from cache and preconnect to api if cache hit is missed
+    useCmp(() => {
       timeout = useTimeout(() => {
         useData({}, statusCodeTimeout);
       });
