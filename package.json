@@ -1,5 +1,5 @@
 {
-  "name": "@apr/data-web",
+  "name": "@audienceproject/data-web",
   "version": "1.0.0",
   "description": "AudienceProject Data services for your websites",
   "main": "dist/audienceproject-data-web.js",

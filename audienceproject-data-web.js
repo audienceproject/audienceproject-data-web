@@ -1,5 +1,5 @@
 export const moduleName = 'AudienceProjectData';
-export const packageName = '@apr/data-web';
+export const packageName = '@audienceproject/data-web';
 export const packageVersion = '1.0.0';
 
 const cacheMemory = {};
