@@ -1,17 +1,19 @@
 import FS from 'fs';
 import Ava from 'ava';
-import AudienceProjectDataWeb, { fetch } from './audienceproject-data-web.js'; // eslint-disable-line import/extensions
+import AudienceProjectData from './audienceproject-data-web.js'; // eslint-disable-line import/extensions
 
 /* eslint-disable import/no-named-as-default-member */
 
 Ava('export methods', (test) => {
-  test.is(typeof AudienceProjectDataWeb, 'object');
-  test.is(typeof AudienceProjectDataWeb.fetch, 'function');
-  test.is(typeof fetch, 'function');
+  test.is(typeof AudienceProjectData, 'object');
+  test.is(typeof AudienceProjectData.fetch, 'function');
 });
 
-Ava('export version', (test) => {
+Ava('export name and package', (test) => {
+  const babelRC = JSON.parse(FS.readFileSync('./.babelrc'));
   const packageJSON = JSON.parse(FS.readFileSync('./package.json'));
 
-  test.is(AudienceProjectDataWeb.version, packageJSON.version);
+  test.is(AudienceProjectData.moduleName, babelRC.moduleId);
+  test.is(AudienceProjectData.packageName, packageJSON.name);
+  test.is(AudienceProjectData.packageVersion, packageJSON.version);
 });

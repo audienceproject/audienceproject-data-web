@@ -1,4 +1,6 @@
-export const version = '1.0.0';
+export const moduleName = 'AudienceProjectData';
+export const packageName = '@apr/data-web';
+export const packageVersion = '1.0.0';
 
 const cacheMemory = {};
 
@@ -94,9 +96,9 @@ export const fetch = (customerId, _options, callback) => {
     ..._options,
   };
 
-  const debugInfo = (...args) => options.debug && console?.log('[AudienceProjectDataWeb]', ...args); // eslint-disable-line no-console, compat/compat
+  const debugInfo = (...args) => options.debug && console?.log(`[${moduleName}]`, ...args); // eslint-disable-line no-console, compat/compat
 
-  debugInfo('Version:', version);
+  debugInfo('Version:', packageVersion);
   debugInfo('Customer ID:', customerId);
   debugInfo('Options:', options);
 
@@ -394,7 +396,7 @@ export const fetch = (customerId, _options, callback) => {
       params.push('gdpr_consent', options.consentString);
     }
 
-    params.push('appid', `@apr/data-web:${version}`);
+    params.push('appid', `${packageName}:${packageVersion}`);
 
     Object.keys(options.requestParams).forEach((key) => {
       params.push(key, options.requestParams[key]);
@@ -465,6 +467,8 @@ export const fetch = (customerId, _options, callback) => {
 };
 
 export default {
-  version,
+  moduleName,
+  packageName,
+  packageVersion,
   fetch,
 };

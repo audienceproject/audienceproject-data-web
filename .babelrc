@@ -1,5 +1,5 @@
 {
-  "moduleId": "AudienceProjectDataWeb",
+  "moduleId": "AudienceProjectData",
 
   "presets": [
     ["@babel/preset-env", {

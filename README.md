@@ -21,19 +21,19 @@ AudienceProject Data services for your websites.
     * With ES6 module:
 
         ```javascript
-        import AudienceProjectDataWeb from '@apr/data-web';
+        import AudienceProjectData from '@apr/data-web';
         ```
 
     * With CommonJS module:
 
         ```javascript
-        var AudienceProjectDataWeb = require('@apr/data-web');
+        var AudienceProjectData = require('@apr/data-web');
         ```
 
     * With AMD module:
 
         ```javascript
-        define(['path/to/audienceproject-data-web'], function (AudienceProjectDataWeb) {});
+        define(['path/to/audienceproject-data-web'], function (AudienceProjectData) {});
         ```
 
 ## API
@@ -43,13 +43,13 @@ AudienceProject Data services for your websites.
 With callback:
 
 ```javascript
-AudienceProjectDataWeb.fetch(customerId, options, callback);
+AudienceProjectData.fetch(customerId, options, callback);
 ```
 
 Promise based:
 
 ```javascript
-AudienceProjectDataWeb.fetch(customerId, options).promise().then(/* callback */).catch(/* callback */);
+AudienceProjectData.fetch(customerId, options).promise().then(/* callback */).catch(/* callback */);
 ```
 
 #### Arguments
