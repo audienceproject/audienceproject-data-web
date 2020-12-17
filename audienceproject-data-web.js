@@ -50,8 +50,13 @@ const cacheMemory = {};
  *                      Number of seconds response should be cached in case of *options.cacheType*
  *                      is not empty.
  *
- * @argument {Object}   [options.requestDomains={regular:'',nonPersonalised:''}]
- *                      Override request domains.
+ * @argument {Object}   [options.requestDomains]
+ *                      Request domains.
+ * @argument {Object}   [options.requestDomains.regular='pdw-usr.userreport.com']
+ *                      Request domain for regular requests.
+ * @argument {Object}   [options.requestDomains.nonPersonalised='dnt-userreport.com']
+ *                      Request domain for non-personalised requests.
+ *
  * @argument {boolean}  [options.debug=false]
  *                      Enable debug logging.
  * @argument {function} [callback]
@@ -87,8 +92,8 @@ export const fetch = (customerId, _options, callback) => {
     cacheTime: 24 * 60 * 60,
 
     requestDomains: {
-      regular: '',
-      nonPersonalised: '',
+      regular: 'pdw-usr.userreport.com',
+      nonPersonalised: 'dnt-userreport.com',
     },
 
     debug: false,
@@ -403,8 +408,8 @@ export const fetch = (customerId, _options, callback) => {
     });
 
     const domain = options.allowPersonalisation
-      ? (options.requestDomains.regular || 'pdw-usr.userreport.com')
-      : (options.requestDomains.nonPersonalised || 'dnt-userreport.com');
+      ? options.requestDomains.regular
+      : options.requestDomains.nonPersonalised;
     let url = `https://${domain}/api/v2/partner/${encodeURIComponent(customerId)}/uid`;
 
     params.forEach((param, index) => {

@@ -22,7 +22,7 @@
     "prepublishOnly": "npm run lint && npm run test && npm run build && npm run compress",
     "watch:build": "nodemon --quiet --on-change-only --watch audienceproject-data-web.js --exec 'npm run build && npm run compress'",
     "watch:test": "nodemon --quiet --on-change-only --watch test.js --exec 'npm run test'",
-    "serve": "http-server --silent --no-dotfiles -c-1",
+    "serve": "http-server --silent --no-dotfiles -c-1 -o",
     "dev": "npm run prepublishOnly && (npm run watch:test & npm run watch:build & npm run serve)"
   },
   "devDependencies": {

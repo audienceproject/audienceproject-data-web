@@ -69,10 +69,19 @@ AudienceProjectData.fetch(customerId, options).promise().then(/* callback */).ca
 * `options.cacheType=''` *(string)*: Type of cache, can be *localStorage* or *memory*.
 * `options.cacheKey='url,allowPersonalisation,requestParams'` *(string)*: Comma separated list of cache key params.
 * `options.cacheTime=86400` *(number)*: Number of seconds response should be cached in case of *options.cacheType* is not empty.
-* `options.requestDomains={regular:'',nonPersonalised:''}` *(Object)*: Override request domains.
+* `options.requestDomains` *(Object)*: Request domains.
+* `options.requestDomains.regular='pdw-usr.userreport.com'` *(Object)*: Request domain for regular requests.
+* `options.requestDomains.nonPersonalised='dnt-userreport.com'` *(Object)*: Request domain for non-personalised requests.
 * `options.debug=false` *(boolean)*: Enable debug logging.
 * `callback` *(Function)*: Optional callback handler.
 
 ## Compatibility
 
 We are supporting all modern and legacy browsers starting with Internet Explorer 10, Firefox 3.6, Chrome 4. [Promise polyfill](https://github.com/stefanpenner/es6-promise) is required if you want to use promise-based callback with Internet Explorer and legacy versions of Firefox/Chrome, see [compatibility table](https://caniuse.com/promises).
+
+## Content Security Policy
+
+Following directive is required to support CSP:
+```
+connect-src https://pdw-usr.userreport.com https://dnt-userreport.com
+```
