@@ -4,6 +4,14 @@ export const packageVersion = '1.0.0';
 
 const cacheMemory = {};
 
+const fetchCodeRunning = 'RUNNING';
+const fetchCodeReady = 'READY';
+const fetchCodeFailed = 'FAILED';
+
+export let fetchStatus = { // eslint-disable-line import/no-mutable-exports
+  state: fetchCodeFailed,
+};
+
 /**
  * Fetch AudienceProject Data
  * @function
@@ -36,9 +44,6 @@ const cacheMemory = {};
  * @argument {number}   [options.timeout=1000]
  *                      Timeout in milliseconds when result needs to be returned since invocation.
  *
- * @argument {boolean}  [options.writeToGlobals=false]
- *                      Should output be written to global variables *apDataKeyValues*,
- *                      *apDataCustomAttributes* and *apDataAudiences*.
  * @argument {boolean}  [options.addStatusKey=false]
  *                      Should status field be added into *keyValues* result.
  *
@@ -83,8 +88,6 @@ export const fetch = (customerId, _options, callback) => {
     requestParams: {},
 
     timeout: 1 * 1000,
-
-    writeToGlobals: false,
     addStatusKey: false,
 
     cacheType: '', // localStorage|memory
@@ -320,22 +323,29 @@ export const fetch = (customerId, _options, callback) => {
     }
   };
 
-  const saveDataToGlobals = (data) => {
-    if (!options.writeToGlobals) {
-      return;
-    }
-
-    debugInfo('Saving prediction to globals…');
-
-    window.apDataKeyValues = data.keyValues || {};
-    window.apDataCustomAttributes = data.customAttributes || {};
-    window.apDataAudiences = data.segments || [];
+  const resultTimeout = {
+    value: 'TIMEOUT',
+    code: -2,
+  };
+  const resultError = {
+    value: 'BACKEND_ERROR',
+    code: -1,
+  };
+  const resultWeb = options.allowPersonalisation ? {
+    value: 'RETURNED',
+    code: 1,
+  } : {
+    value: 'RETURNED_ANONYMOUS',
+    code: '1a',
+  };
+  const resultCache = options.allowPersonalisation ? {
+    value: 'RETURNED_FROM_CACHE',
+    code: 2,
+  } : {
+    value: 'RETURNED_ANONYMOUS_FROM_CACHE',
+    code: '2a',
   };
 
-  const statusCodeTimeout = -2;
-  const statusCodeWebError = -1;
-  const statusCodeWebSuccess = 1;
-  const statusCodeCache = 2;
   const saveDataStatusKey = (data, statusCode) => {
     if (!options.addStatusKey) {
       return;
@@ -344,9 +354,7 @@ export const fetch = (customerId, _options, callback) => {
     debugInfo('Updating status fields…');
 
     data.keyValues = data.keyValues || {}; // eslint-disable-line no-param-reassign
-
-    const personalisationSuffix = statusCode > 0 && options.allowPersonalisation ? '' : 'a';
-    data.keyValues.ap_ds = `${statusCode}${personalisationSuffix}`; // eslint-disable-line no-param-reassign
+    data.keyValues.ap_ds = statusCode; // eslint-disable-line no-param-reassign
   };
 
   const fetchJSON = (url, resolve, reject) => {
@@ -427,6 +435,10 @@ export const fetch = (customerId, _options, callback) => {
     let timeout;
     let dataUsed = false;
 
+    fetchStatus = {
+      state: fetchCodeRunning,
+    };
+
     const useData = (data, statusCode) => {
       if (dataUsed) {
         return;
@@ -435,35 +447,42 @@ export const fetch = (customerId, _options, callback) => {
       dataUsed = true;
       clearTimeout(timeout);
 
-      saveDataStatusKey(data, statusCode);
-      saveDataToGlobals(data);
+      saveDataStatusKey(data, statusCode.code);
+      fetchStatus = {
+        state: statusCode.code > 0 ? fetchCodeReady : fetchCodeFailed,
+        options,
+        result: {
+          type: resultCache.value,
+          ...data,
+        },
+      };
 
       resolve(data);
     };
 
     useCmp(() => {
       timeout = useTimeout(() => {
-        useData({}, statusCodeTimeout);
+        useData({}, resultTimeout);
       });
 
       checkSessionReferrer();
 
       return readDataFromCache((data) => {
-        useData(data, statusCodeCache);
+        useData(data, resultCache);
       }, () => (
         readDataFromWeb((data) => {
           saveDataToCache(data);
 
-          useData(data, statusCodeWebSuccess);
+          useData(data, resultWeb);
         }, () => {
-          useData({}, statusCodeWebError);
+          useData({}, resultError);
         })
       ));
     }, reject);
   };
 
   if (typeof callback === 'function') {
-    getData(callback);
+    return getData(callback);
   }
 
   return {
@@ -476,4 +495,5 @@ export default {
   packageName,
   packageVersion,
   fetch,
+  fetchStatus,
 };

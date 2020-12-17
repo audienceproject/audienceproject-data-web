@@ -64,7 +64,6 @@ AudienceProjectData.fetch(customerId, options).promise().then(/* callback */).ca
 * `options.waitForCmpConsent=false` *(boolean)*: Should we wait for explicit CMP consent before firing timeout.
 * `options.requestParams={}` *(Object)*: Extra request params or information about user.
 * `options.timeout=1000` *(number)*: Timeout in milliseconds when result needs to be returned since invocation.
-* `options.writeToGlobals=false` *(boolean)*: Should output be written to global variables *apDataKeyValues*, *apDataCustomAttributes* and *apDataAudiences*.
 * `options.addStatusKey=false` *(boolean)*: Should status field be added into *keyValues* result.
 * `options.cacheType=''` *(string)*: Type of cache, can be *localStorage* or *memory*.
 * `options.cacheKey='url,allowPersonalisation,requestParams'` *(string)*: Comma separated list of cache key params.
