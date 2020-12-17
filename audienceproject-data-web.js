@@ -39,7 +39,7 @@ const cacheMemory = {};
  * @argument {boolean}  [options.writeToGlobals=false]
  *                      Should output be written to global variables *apDataKeyValues*,
  *                      *apDataCustomAttributes* and *apDataAudiences*.
- * @argument {boolean}  [options.addStatusField=false]
+ * @argument {boolean}  [options.addStatusKey=false]
  *                      Should status field be added into *keyValues* result.
  *
  * @argument {string}   [options.cacheType='']
@@ -85,7 +85,7 @@ export const fetch = (customerId, _options, callback) => {
     timeout: 1 * 1000,
 
     writeToGlobals: false,
-    addStatusField: false,
+    addStatusKey: false,
 
     cacheType: '', // localStorage|memory
     cacheKey: 'url,allowPersonalisation,requestParams',
@@ -336,8 +336,8 @@ export const fetch = (customerId, _options, callback) => {
   const statusCodeWebError = -1;
   const statusCodeWebSuccess = 1;
   const statusCodeCache = 2;
-  const addStatusField = (data, statusCode) => {
-    if (!options.addStatusField) {
+  const saveDataStatusKey = (data, statusCode) => {
+    if (!options.addStatusKey) {
       return;
     }
 
@@ -435,7 +435,7 @@ export const fetch = (customerId, _options, callback) => {
       dataUsed = true;
       clearTimeout(timeout);
 
-      addStatusField(data, statusCode);
+      saveDataStatusKey(data, statusCode);
       saveDataToGlobals(data);
 
       resolve(data);
