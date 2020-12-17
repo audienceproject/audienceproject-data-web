@@ -273,8 +273,10 @@ export const fetch = (customerId, _options, callback) => {
 
   const currentTimestamp = Math.round(new Date().getTime() / 1000);
 
+  const cacheType = options.cacheType === 'localStorage' && !options.allowStorageAccess ? 'memory' : options.cacheType;
+
   const readDataFromCache = (resolve, reject) => {
-    if (!options.cacheType) {
+    if (!cacheType) {
       return reject();
     }
 
@@ -282,10 +284,10 @@ export const fetch = (customerId, _options, callback) => {
 
     let value;
 
-    if (options.cacheType === 'localStorage') {
+    if (cacheType === 'localStorage') {
       debugInfo('Reading prediction from local storage key:', storagePredictionCache);
       value = storageRead(storagePredictionCache);
-    } else if (options.cacheType === 'memory') {
+    } else if (cacheType === 'memory') {
       debugInfo('Reading prediction from memory key:', cacheKey);
       value = cacheMemory[cacheKey];
     }
@@ -304,7 +306,7 @@ export const fetch = (customerId, _options, callback) => {
   };
 
   const saveDataToCache = (value) => {
-    if (!options.cacheType) {
+    if (!cacheType) {
       return;
     }
 
@@ -316,9 +318,9 @@ export const fetch = (customerId, _options, callback) => {
       hash: cacheKey,
     };
 
-    if (options.cacheType === 'localStorage') {
+    if (cacheType === 'localStorage') {
       storageWrite(storagePredictionCache, data);
-    } else if (options.cacheType === 'memory') {
+    } else if (cacheType === 'memory') {
       cacheMemory[cacheKey] = data;
     }
   };

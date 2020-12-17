@@ -7,7 +7,7 @@ AudienceProject Data services for your websites.
 1. Install [NPM package](https://www.npmjs.com/package/@audienceproject/data-web):
 
     ```shell
-    npm install @audienceproject/data-web
+    npm install --save @audienceproject/data-web
     ```
 
 2. Load package into your application:
