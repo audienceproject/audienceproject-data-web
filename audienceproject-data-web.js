@@ -413,9 +413,24 @@ export const fetch = (customerId, _options, callback) => {
 
     params.push('appid', `${packageName}:${packageVersion}`);
 
-    Object.keys(options.requestParams).forEach((key) => {
-      params.push(key, options.requestParams[key]);
-    });
+    const isArray = (array) => Object.prototype.toString.call(array) === '[object Array]';
+
+    (function walk(data, prefix) {
+      Object.keys(data).forEach((key) => {
+        const value = data[key];
+        const subKey = prefix + key;
+
+        if (isArray(value)) {
+          value.forEach((subValue) => {
+            params.push(subKey, subValue);
+          });
+        } else if (typeof value === 'object') {
+          walk(value, `${subKey}_`);
+        } else {
+          params.push(subKey, value);
+        }
+      });
+    }(options.requestParams, ''));
 
     const domain = options.allowPersonalisation
       ? options.requestDomains.regular
