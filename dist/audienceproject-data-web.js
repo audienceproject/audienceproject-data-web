@@ -22,7 +22,7 @@
   _exports.moduleName = moduleName;
   var packageName = '@audienceproject/data-web';
   _exports.packageName = packageName;
-  var packageVersion = '1.0.1';
+  var packageVersion = '1.0.2';
   _exports.packageVersion = packageVersion;
   var cacheMemory = {};
   var fetchCodeRunning = 'RUNNING';
@@ -229,9 +229,9 @@
         options.consentString = model.tcString || '';
 
         if (options.gdprApplies) {
-          var _model$vendors, _model$vendors$consen, _model$purpose, _model$purpose$consen, _model$purpose2, _model$purpose2$conse;
+          var _model$vendor, _model$vendor$consent, _model$purpose, _model$purpose$consen, _model$purpose2, _model$purpose2$conse;
 
-          var hasVendor = (_model$vendors = model.vendors) == null ? void 0 : (_model$vendors$consen = _model$vendors.consents) == null ? void 0 : _model$vendors$consen[vendorId];
+          var hasVendor = (_model$vendor = model.vendor) == null ? void 0 : (_model$vendor$consent = _model$vendor.consents) == null ? void 0 : _model$vendor$consent[vendorId];
           options.allowStorageAccess = Boolean(hasVendor && ((_model$purpose = model.purpose) == null ? void 0 : (_model$purpose$consen = _model$purpose.consents) == null ? void 0 : _model$purpose$consen[1]));
           options.allowPersonalisation = Boolean(hasVendor && ((_model$purpose2 = model.purpose) == null ? void 0 : (_model$purpose2$conse = _model$purpose2.consents) == null ? void 0 : _model$purpose2$conse[3]));
         }
@@ -486,14 +486,17 @@
         dataUsed = true;
         clearTimeout(timeout);
         saveDataStatusKey(data, statusCode.code);
+
+        var result = _extends({
+          type: statusCode.value
+        }, data);
+
         _exports.fetchStatus = fetchStatus = {
           state: statusCode.code > 0 ? fetchCodeReady : fetchCodeFailed,
           options: options,
-          result: _extends({
-            type: resultCache.value
-          }, data)
+          result: result
         };
-        resolve(data);
+        resolve(result);
       };
 
       useCmp(function () {
