@@ -469,7 +469,7 @@ export const fetch = (customerId, _options, callback) => {
         state: statusCode.code > 0 ? fetchCodeReady : fetchCodeFailed,
         options,
         result: {
-          type: resultCache.value,
+          type: statusCode.value,
           ...data,
         },
       };
