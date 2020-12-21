@@ -203,7 +203,7 @@ export const fetch = (customerId, _options, callback) => {
       options.consentString = model.tcString || '';
 
       if (options.gdprApplies) {
-        const hasVendor = model.vendors?.consents?.[vendorId];
+        const hasVendor = model.vendor?.consents?.[vendorId];
 
         options.allowStorageAccess = Boolean(hasVendor && model.purpose?.consents?.[1]);
         options.allowPersonalisation = Boolean(hasVendor && model.purpose?.consents?.[3]);
