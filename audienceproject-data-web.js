@@ -465,16 +465,19 @@ export const fetch = (customerId, _options, callback) => {
       clearTimeout(timeout);
 
       saveDataStatusKey(data, statusCode.code);
+
+      const result = {
+        type: statusCode.value,
+        ...data,
+      };
+
       fetchStatus = {
         state: statusCode.code > 0 ? fetchCodeReady : fetchCodeFailed,
         options,
-        result: {
-          type: statusCode.value,
-          ...data,
-        },
+        result,
       };
 
-      resolve(data);
+      resolve(result);
     };
 
     useCmp(() => {
