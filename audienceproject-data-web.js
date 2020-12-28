@@ -179,6 +179,22 @@ export const fetch = (customerId, _options, callback) => {
     } catch (error) {} // eslint-disable-line no-empty
   };
 
+  const storageCheckAccess = () => {
+    if (!options.allowStorageAccess) {
+      return false;
+    }
+
+    const key = `apr_check_access@${Math.random()}`;
+    try {
+      storage[key] = key;
+      const hasAccess = storage[key] === key;
+      delete storage[key];
+      return hasAccess;
+    } catch (error) {} // eslint-disable-line no-empty
+
+    return false;
+  };
+
   const useCmp = (resolve) => {
     if (!options.integrateWithCmp) {
       resolve();
@@ -273,7 +289,7 @@ export const fetch = (customerId, _options, callback) => {
 
   const currentTimestamp = Math.round(new Date().getTime() / 1000);
 
-  const cacheType = options.cacheType === 'localStorage' && !options.allowStorageAccess ? 'memory' : options.cacheType;
+  const cacheType = options.cacheType === 'localStorage' && !storageCheckAccess() ? 'memory' : options.cacheType;
 
   const readDataFromCache = (resolve, reject) => {
     if (!cacheType) {
