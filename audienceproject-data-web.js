@@ -462,9 +462,9 @@ export const fetch = (customerId, _options, callback) => {
     return fetchJSON(url, resolve, reject);
   };
 
-  debugInfo('Running promise…');
+  const resolvers = [];
 
-  const getData = (resolve, reject) => {
+  const getData = () => {
     let timeout;
     let dataUsed = false;
 
@@ -493,7 +493,11 @@ export const fetch = (customerId, _options, callback) => {
         result,
       };
 
-      resolve(result);
+
+      debugInfo('Callback result:', result);
+      resolvers.forEach((resolver) => {
+        resolver(result);
+      });
     };
 
     useCmp(() => {
@@ -514,15 +518,21 @@ export const fetch = (customerId, _options, callback) => {
           useData({}, resultError);
         })
       ));
-    }, reject);
+    });
   };
 
   if (typeof callback === 'function') {
-    return getData(callback);
+    resolvers.push(callback);
   }
 
+  getData();
+
   return {
-    promise: () => new Promise(getData),
+    promise: () => new Promise((resolve) => {
+      debugInfo('Promise called…');
+
+      resolvers.push(resolve);
+    }),
   };
 };
 
