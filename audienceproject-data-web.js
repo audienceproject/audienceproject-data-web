@@ -1,15 +1,17 @@
 export const moduleName = 'AudienceProjectData';
+
 export const packageName = '@audienceproject/data-web';
 export const packageVersion = '1.0.2';
 
-const cacheMemory = {};
+export const fetchCache = {};
 
-const fetchCodeRunning = 'RUNNING';
-const fetchCodeReady = 'READY';
-const fetchCodeFailed = 'FAILED';
+export const fetchStateInitial = 'INITIAL';
+export const fetchStateRunning = 'RUNNING';
+export const fetchStateReady = 'READY';
+export const fetchStateFailed = 'FAILED';
 
-export let fetchStatus = { // eslint-disable-line import/no-mutable-exports
-  state: fetchCodeFailed,
+export const fetchStatus = {
+  state: fetchStateInitial,
 };
 
 /**
@@ -70,8 +72,8 @@ export let fetchStatus = { // eslint-disable-line import/no-mutable-exports
  * @returns {Object}
  */
 
-export const fetch = (customerId, _options, callback) => {
-  if (typeof customerId !== 'string') {
+export const fetch = (customerId, customerOptions, callback) => {
+  if (typeof customerId !== 'string' || !customerId) {
     throw new Error('Invalid customer ID');
   }
 
@@ -101,14 +103,19 @@ export const fetch = (customerId, _options, callback) => {
 
     debug: false,
 
-    ..._options,
+    ...customerOptions,
   };
 
   const debugInfo = (...args) => options.debug && console?.log(`[${moduleName}]`, ...args); // eslint-disable-line no-console, compat/compat
 
+  debugInfo('Fetch called…');
+
   debugInfo('Version:', packageVersion);
+
   debugInfo('Customer ID:', customerId);
-  debugInfo('Options:', options);
+  debugInfo('Customer options:', customerOptions);
+
+  debugInfo('Fetch options:', options);
 
   const jsonParse = (data) => {
     try {
@@ -313,7 +320,7 @@ export const fetch = (customerId, _options, callback) => {
       value = storageRead(storagePredictionCache);
     } else if (cacheType === 'memory') {
       debugInfo('Reading prediction from memory key:', cacheKey);
-      value = cacheMemory[cacheKey];
+      value = fetchCache[cacheKey];
     }
 
     if (typeof value !== 'object') {
@@ -345,7 +352,7 @@ export const fetch = (customerId, _options, callback) => {
     if (cacheType === 'localStorage') {
       storageWrite(storagePredictionCache, data);
     } else if (cacheType === 'memory') {
-      cacheMemory[cacheKey] = data;
+      fetchCache[cacheKey] = data;
     }
   };
 
@@ -475,18 +482,17 @@ export const fetch = (customerId, _options, callback) => {
   const resolvers = [];
 
   const getData = () => {
+    fetchStatus.state = fetchStateRunning;
+    delete fetchStatus.result;
+    delete fetchStatus.options;
+
     let timeout;
+
     let dataUsed = false;
-
-    fetchStatus = {
-      state: fetchCodeRunning,
-    };
-
     const useData = (data, statusCode) => {
       if (dataUsed) {
         return;
       }
-
       dataUsed = true;
 
       saveDataStatusKey(data, statusCode.code);
@@ -496,11 +502,9 @@ export const fetch = (customerId, _options, callback) => {
         ...data,
       };
 
-      fetchStatus = {
-        state: statusCode.code > 0 ? fetchCodeReady : fetchCodeFailed,
-        options,
-        result,
-      };
+      fetchStatus.state = statusCode.code > 0 ? fetchStateReady : fetchStateFailed;
+      fetchStatus.result = result;
+      fetchStatus.options = options;
 
       unuseTimeout(timeout);
       abortJSON();
@@ -549,8 +553,18 @@ export const fetch = (customerId, _options, callback) => {
 
 export default {
   moduleName,
+
   packageName,
   packageVersion,
-  fetch,
+
+  fetchCache,
+
+  fetchStateInitial,
+  fetchStateRunning,
+  fetchStateReady,
+  fetchStateFailed,
+
   fetchStatus,
+
+  fetch,
 };
