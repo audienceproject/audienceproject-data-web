@@ -1,50 +1,375 @@
 <!DOCTYPE html>
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; connect-src https://pdw-usr.userreport.com https://dnt-userreport.com">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https://pdw-usr.userreport.com https://dnt-userreport.com">
 
+<title>AudienceProject Data Web Test</title>
+<h2>AudienceProject Data Web Test</h2>
+
+<style>
+  h2 {
+    margin: 0 0 10px 0;
+  }
+
+  details {
+    display: block;
+    margin-top: 10px;
+  }
+
+  summary {
+    font-weight: bold;
+    cursor: default;
+  }
+
+  label {
+    display: block;
+    display: flex;
+    align-items: center;
+    margin-left: 17px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  label.offset {
+    margin-left: 35px;
+  }
+
+  label > input[type="checkbox"] {
+    margin-left:0;
+    margin-right:5px;
+  }
+
+  label > input:not([type="checkbox"]) {
+    margin-left:5px;
+    margin-right:0;
+  }
+
+  input[type="number"] {
+    width: 80px;
+  }
+  input[data-type="json"] {
+    width: 300px;
+  }
+</style>
 
 <script src="node_modules/es6-promise/dist/es6-promise.auto.js"></script>
+<script>
+  if (typeof console === 'undefined') {
+    console = { log: function() {} };
+  }
+</script>
 <script src="dist/audienceproject-data-web.js"></script>
 
+<input id="fetch-customerId" placeholder="Customer ID">
+<input id="fetch-call" type="button" value="Fetch">
+
+<details>
+  <summary>Fetch Options</summary>
+
+  <label>
+    <input id="fetch-options-allowStorageAccess" type="checkbox" checked>
+    Allow storage access
+  </label>
+
+  <label>
+    <input id="fetch-options-allowPersonalisation" type="checkbox" checked>
+    Allow personalisation
+  </label>
+
+  <label>
+    <input id="fetch-options-gdprApplies" type="checkbox" indeterminate>
+    GDPR applies
+  </label>
+
+  <label>
+    Consent string
+    <input id="fetch-options-consentString">
+  </label>
+
+  <label>
+    <input id="fetch-options-integrateWithCmp" type="checkbox">
+    Integrate with CMP
+  </label>
+
+  <label>
+    <input id="fetch-options-waitForCmpConsent" type="checkbox">
+    Wait for CMP consent
+  </label>
+
+  <label>
+    Request params
+    <input id="fetch-options-requestParams" data-type="json" value="{}">
+  </label>
+
+  <label>
+    Timeout
+    <input id="fetch-options-timeout" type="number" value="1000" step="100" min="0">
+  </label>
+
+  <label>
+    <input id="fetch-options-addStatusKey" type="checkbox">
+    Add status key
+  </label>
+
+  <label>
+    Cache type
+    <input id="fetch-options-cacheType">
+  </label>
+
+  <label>
+    Cache key
+    <input id="fetch-options-cacheKey" value="url,allowPersonalisation,requestParams">
+  </label>
+
+  <label>
+    Cache time
+    <input id="fetch-options-cacheTime" type="number" value="86400" step="60" min="0">
+  </label>
+
+  <label>
+    Request domains
+    <input id="fetch-options-requestDomains" data-type="json" value='{"regular":"pdw-usr.userreport.com","nonPersonalised":"dnt-userreport.com"}'>
+  </label>
+
+  <label>
+    <input id="fetch-options-debug" type="checkbox">
+    Debug
+  </label>
+</details>
+
 <script>
-    window.__tcfapi = function (command, version, callback, arguments) {
-    console.log('[Test Page] TCF 2.0 call:', command, arguments);
+  document.getElementById('fetch-options-debug').checked = true;
 
-    if (command === 'getTCData') {
-      callback({
-        gdprApplies: true,
-        tcString: ''
-      }, true);
-    } else
+  Array.prototype.forEach.call(document.querySelectorAll('[indeterminate]'), function (node) {
+    node.defaultIndeterminate = node.indeterminate = true;
+  });
 
-    if (command === 'addEventListener') {
-      callback({
-        gdprApplies: true,
-        tcString: 'abc',
-        purpose: {
-          consents: {
-            1: true,
-            3: true
-          }
-        },
-        vendor: {
-          consents: {
-            394: true
-          }
-        }
-      }, true);
+  var getOptions = function () {
+    var options = {};
+
+    Array.prototype.forEach.call(document.querySelectorAll('[id^="fetch-options-"]'), function (node) {
+      var value = node.type === 'checkbox'
+        ? node.indeterminate ? null : node.checked
+        : node.value;
+      var defaultValue = node.type === 'checkbox'
+        ? node.defaultIndeterminate ? null : node.defaultChecked
+        : node.defaultValue;
+
+      if (value === defaultValue) {
+        return;
+      }
+
+      if (node.type === 'number') {
+        value = Number(value);
+        defaultValue = Number(defaultValue);
+      } else if (node.getAttribute('data-type') === 'json') {
+        value = JSON.parse(value);
+        defaultValue = JSON.parse(defaultValue);
+      }
+
+      options[node.id.split('-').pop()] = value;
+    });
+
+    return options;
+  }
+</script>
+
+<details>
+  <summary>Page Options</summary>
+
+  <label>
+    <input id="page-options-tcf" type="checkbox">
+    Use TCF 2.0 API
+  </label>
+
+  <label class="offset">
+    <input id="page-options-tcf-explicit" type="checkbox">
+    Consent is given on first request
+  </label>
+
+  <label class="offset">
+    <input id="page-options-tcf-storage" type="checkbox">
+    Consent to use storage (Purpose #1)
+  </label>
+
+  <label class="offset">
+    <input id="page-options-tcf-personalization" type="checkbox">
+    Consent to use personalization (Purpose #3)
+  </label>
+
+  <label class="offset">
+    <input id="page-options-tcf-vendor" type="checkbox">
+    Consent for AudienceProject (Vendor #294)
+  </label>
+
+  <label>
+    <input id="page-options-localstorage" type="checkbox">
+    Freeze local storage
+  </label>
+
+  <label>
+    <input id="page-options-referrer" type="checkbox">
+    Emulate external referrer
+  </label>
+</details>
+
+<script>
+  (function () {
+    var node = document.getElementById('page-options-tcf');
+
+    var mock = function (command, version, callback, arguments) {
+      console.log('[Test Page] TCF 2.0 call:', command, arguments);
+
+      var explicit = document.getElementById('page-options-tcf-explicit').checked;
+
+      if (command === 'getTCData' && !explicit) {
+        callback({
+          gdprApplies: true,
+          tcString: ''
+        }, true);
+      } else
+
+      if ((command === 'getTCData' && explicit) || command === 'addEventListener') {
+        setTimeout(function () {
+          callback({
+            gdprApplies: true,
+            tcString: 'abc',
+            purpose: {
+              consents: {
+                1: document.getElementById('page-options-tcf-storage').checked,
+                3: document.getElementById('page-options-tcf-personalization').checked
+              }
+            },
+            vendor: {
+              consents: {
+                394: document.getElementById('page-options-tcf-vendor').checked
+              }
+            }
+          }, true);
+        }, 1000);
+      }
+    };
+
+    node.onclick = function () {
+      if (node.checked) {
+        window.__tcfapi = mock;
+      } else {
+        delete window.__tcfapi;
+      }
     }
-  };
+
+    node.onclick();
+  })();
+
+  (function () {
+    var realLocalStorage = localStorage;
+    var node = document.getElementById('page-options-localstorage');
+
+    node.onclick = function() {
+      if (node.checked) {
+        Object.defineProperty(window, 'localStorage', {
+          value: Object.freeze({}),
+          writable: true
+        });
+      } else {
+        Object.defineProperty(window, 'localStorage', {
+          value: realLocalStorage,
+          writable: true
+        });
+      }
+    };
+
+    node.onclick();
+  })();
+
+  (function () {
+    var realDocumentReferrer = document.referrer;
+    var node = document.getElementById('page-options-referrer');
+
+    node.onclick = function() {
+      if (node.checked) {
+        Object.defineProperty(document, 'referrer', {
+          value: 'https://www.audienceproject.com/',
+          writable: true
+        });
+      } else {
+        Object.defineProperty(document, 'referrer', {
+          value: realDocumentReferrer,
+          writable: true
+        });
+      }
+    };
+
+    node.onclick();
+  })();
+</script>
+
+<details>
+  <summary>Fetch Status</summary>
+
+  <label>
+    <textarea id="fetch-status-area" rows="15" style="width:100%" disabled></textarea>
+  </label>
+</details>
+
+<script>
+  (function () {
+    var node = document.getElementById('fetch-status-area');
+
+    setInterval(function () {
+      var data = JSON.stringify(AudienceProjectData.fetchStatus, null, 2);
+
+      if (node.innerHTML !== data) {
+        node.innerHTML = data;
+      }
+    }, 50);
+  })();
+</script>
+
+<details open>
+  <summary>Debug Log</summary>
+
+  <label>
+    <textarea id="debug-log-area" rows="25" style="width:100%" disabled></textarea>
+  </label>
+</details>
+
+<script>
+  (function () {
+    var node = document.getElementById('debug-log-area');
+
+    var realConsoleLog = console.log;
+    console.log = function() {
+      realConsoleLog.apply(console, arguments);
+
+      if (arguments[0] !== '[AudienceProjectData]') {
+        return;
+      }
+
+      Array.prototype.map.call(arguments, function (data, index, items) {
+          var result = typeof data === 'object' ? JSON.stringify(data) : data;
+          node.innerHTML += result + (index < items.length - 1 ? ' ' : '\n');
+      });
+    }
+  })();
+
+  var resetLogArea = function () {
+    document.getElementById('debug-log-area').innerHTML = '';
+  }
 </script>
 
 <script>
-  const onSuccess = function (data) {
-    console.log('[Test Page] Success:', data);
-  };
-  const onError = function (error) {
-    console.log('[Test Page] Error:', error);
-  };
+  document.getElementById('fetch-call').onclick = function () {
+    resetLogArea();
 
-  AudienceProjectData.fetch('test', { debug: true }).promise()
-    .then(onSuccess)
-    .catch(onError);
+    var customer = document.getElementById('fetch-customerId').value || 'test';
+    var options = getOptions();
+
+    AudienceProjectData.fetch(customer, options, function (data) {
+      console.log('[Test Page] Success callback:', data);
+    }).promise()
+      .then(function (data) {
+      console.log('[Test Page] Success promise:', data);
+    })
+      .catch(function (error) {
+      console.log('[Test Page] Error promise:', error);
+    });
+  }
 </script>
