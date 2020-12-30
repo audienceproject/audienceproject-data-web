@@ -327,7 +327,7 @@ export const fetch = (customerId, customerOptions, callback) => {
       return reject();
     }
 
-    if (value.ttl < currentTimestamp || value.hash !== cacheKey) {
+    if (value.ttl + options.cacheTime < currentTimestamp || value.hash !== cacheKey) {
       debugInfo('Cached prediction expired…');
       return reject();
     }
@@ -345,7 +345,7 @@ export const fetch = (customerId, customerOptions, callback) => {
 
     const data = {
       data: value,
-      ttl: options.cacheTime + currentTimestamp,
+      ttl: currentTimestamp,
       hash: cacheKey,
     };
 
