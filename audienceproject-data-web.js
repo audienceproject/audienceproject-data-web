@@ -387,7 +387,7 @@ export const fetch = (customerId, customerOptions, callback) => {
     debugInfo('Updating status fields…');
 
     data.keyValues = data.keyValues || {}; // eslint-disable-line no-param-reassign
-    data.keyValues.ap_ds = statusCode; // eslint-disable-line no-param-reassign
+    data.keyValues.ap_ds = String(statusCode); // eslint-disable-line no-param-reassign
   };
 
   const ajax = new XMLHttpRequest();
