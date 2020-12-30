@@ -76,7 +76,7 @@ AudienceProjectData.fetch(customerId, options).promise().then(/* callback */).ca
 
 ## Compatibility
 
-We are supporting all modern and legacy browsers starting with Internet Explorer 10, Firefox 3.6, Chrome 4. [Promise polyfill](https://github.com/stefanpenner/es6-promise) is required if you want to use promise-based callback with Internet Explorer and legacy versions of Firefox/Chrome, see [compatibility table](https://caniuse.com/promises).
+We are supporting all modern and legacy browsers starting with Internet Explorer 10, Firefox 27, Chrome 22. [Promise polyfill](https://github.com/stefanpenner/es6-promise) is required if you want to use promise-based callback with Internet Explorer and legacy versions of Firefox/Chrome, see [compatibility table](https://caniuse.com/promises).
 
 ## Content Security Policy
 
