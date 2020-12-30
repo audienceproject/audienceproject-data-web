@@ -263,14 +263,22 @@ export const fetch = (customerId, _options, callback) => {
     callTcf('getTCData', listenResponse);
   };
 
+  let timeoutStart;
   const useTimeout = (resolve) => {
     if (!options.timeout) {
       return undefined;
     }
 
-    debugInfo('Starting reject timeout…');
+    debugInfo('Timeout started…');
+    timeoutStart = new Date().getTime();
 
     return setTimeout(resolve, options.timeout);
+  };
+  const unuseTimeout = (timeout) => {
+    clearTimeout(timeout);
+
+    const timeoutTime = new Date().getTime() - timeoutStart;
+    debugInfo('Timeout ended:', timeoutTime, 'ms');
   };
 
   const checkSessionReferrer = () => {
@@ -375,20 +383,19 @@ export const fetch = (customerId, _options, callback) => {
     data.keyValues.ap_ds = statusCode; // eslint-disable-line no-param-reassign
   };
 
+  const ajax = new XMLHttpRequest();
   const fetchJSON = (url, resolve, reject) => {
-    debugInfo('Fetching URL:', url);
-
-    const ajax = new XMLHttpRequest();
+    debugInfo('API request:', url);
 
     ajax.onreadystatechange = () => {
       if (ajax.readyState === XMLHttpRequest.DONE) {
         if (ajax.status === 200) {
           const json = jsonParse(ajax.responseText);
 
-          debugInfo('Response succeed', json);
+          debugInfo('API response:', json);
           resolve(json);
         } else {
-          debugInfo('Response failed:', ajax);
+          debugInfo('API failed with code:', ajax.status);
           reject();
         }
       }
@@ -397,6 +404,9 @@ export const fetch = (customerId, _options, callback) => {
     ajax.open('GET', url, true);
     ajax.withCredentials = options.allowPersonalisation;
     ajax.send();
+  };
+  const abortJSON = () => {
+    ajax.abort();
   };
 
   const readDataFromWeb = (resolve, reject) => {
@@ -478,7 +488,6 @@ export const fetch = (customerId, _options, callback) => {
       }
 
       dataUsed = true;
-      clearTimeout(timeout);
 
       saveDataStatusKey(data, statusCode.code);
 
@@ -493,6 +502,8 @@ export const fetch = (customerId, _options, callback) => {
         result,
       };
 
+      unuseTimeout(timeout);
+      abortJSON();
 
       debugInfo('Callback result:', result);
       resolvers.forEach((resolver) => {
