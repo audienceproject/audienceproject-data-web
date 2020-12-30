@@ -14,7 +14,7 @@
   "use strict";
 
   _exports.__esModule = true;
-  _exports["default"] = _exports.fetch = _exports.fetchStatus = _exports.packageVersion = _exports.packageName = _exports.moduleName = void 0;
+  _exports["default"] = _exports.fetch = _exports.fetchStatus = _exports.fetchStateFailed = _exports.fetchStateReady = _exports.fetchStateRunning = _exports.fetchStateInitial = _exports.fetchCache = _exports.packageVersion = _exports.packageName = _exports.moduleName = void 0;
 
   function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
@@ -24,13 +24,18 @@
   _exports.packageName = packageName;
   var packageVersion = '1.0.2';
   _exports.packageVersion = packageVersion;
-  var cacheMemory = {};
-  var fetchCodeRunning = 'RUNNING';
-  var fetchCodeReady = 'READY';
-  var fetchCodeFailed = 'FAILED';
+  var fetchCache = {};
+  _exports.fetchCache = fetchCache;
+  var fetchStateInitial = 'INITIAL';
+  _exports.fetchStateInitial = fetchStateInitial;
+  var fetchStateRunning = 'RUNNING';
+  _exports.fetchStateRunning = fetchStateRunning;
+  var fetchStateReady = 'READY';
+  _exports.fetchStateReady = fetchStateReady;
+  var fetchStateFailed = 'FAILED';
+  _exports.fetchStateFailed = fetchStateFailed;
   var fetchStatus = {
-    // eslint-disable-line import/no-mutable-exports
-    state: fetchCodeFailed
+    state: fetchStateInitial
   };
   /**
    * Fetch AudienceProject Data
@@ -92,8 +97,8 @@
 
   _exports.fetchStatus = fetchStatus;
 
-  var fetch = function fetch(customerId, _options, callback) {
-    if (typeof customerId !== 'string') {
+  var fetch = function fetch(customerId, customerOptions, callback) {
+    if (typeof customerId !== 'string' || !customerId) {
       throw new Error('Invalid customer ID');
     }
 
@@ -116,7 +121,7 @@
         nonPersonalised: 'dnt-userreport.com'
       },
       debug: false
-    }, _options);
+    }, customerOptions);
 
     var debugInfo = function debugInfo() {
       var _console;
@@ -129,9 +134,11 @@
     }; // eslint-disable-line no-console, compat/compat
 
 
+    debugInfo('Fetch called…');
     debugInfo('Version:', packageVersion);
     debugInfo('Customer ID:', customerId);
-    debugInfo('Options:', options);
+    debugInfo('Customer options:', customerOptions);
+    debugInfo('Fetch options:', options);
 
     var jsonParse = function jsonParse(data) {
       try {
@@ -207,6 +214,24 @@
 
     };
 
+    var storageCheckAccess = function storageCheckAccess() {
+      if (!options.allowStorageAccess) {
+        return false;
+      }
+
+      var key = "apr_check_access@" + Math.random();
+
+      try {
+        storage[key] = key;
+        var hasAccess = storage[key] === key;
+        delete storage[key];
+        return hasAccess;
+      } catch (error) {} // eslint-disable-line no-empty
+
+
+      return false;
+    };
+
     var useCmp = function useCmp(resolve) {
       if (!options.integrateWithCmp) {
         resolve();
@@ -276,13 +301,22 @@
       callTcf('getTCData', listenResponse);
     };
 
+    var timeoutStart;
+
     var useTimeout = function useTimeout(resolve) {
       if (!options.timeout) {
         return undefined;
       }
 
-      debugInfo('Starting reject timeout…');
+      debugInfo('Timeout started…');
+      timeoutStart = new Date().getTime();
       return setTimeout(resolve, options.timeout);
+    };
+
+    var unuseTimeout = function unuseTimeout(timeout) {
+      clearTimeout(timeout);
+      var timeoutTime = new Date().getTime() - timeoutStart;
+      debugInfo('Timeout ended:', timeoutTime, 'ms');
     };
 
     var checkSessionReferrer = function checkSessionReferrer() {
@@ -300,7 +334,7 @@
     };
 
     var currentTimestamp = Math.round(new Date().getTime() / 1000);
-    var cacheType = options.cacheType === 'localStorage' && !options.allowStorageAccess ? 'memory' : options.cacheType;
+    var cacheType = options.cacheType === 'localStorage' && !storageCheckAccess() ? 'memory' : options.cacheType;
 
     var readDataFromCache = function readDataFromCache(resolve, reject) {
       if (!cacheType) {
@@ -315,7 +349,7 @@
         value = storageRead(storagePredictionCache);
       } else if (cacheType === 'memory') {
         debugInfo('Reading prediction from memory key:', cacheKey);
-        value = cacheMemory[cacheKey];
+        value = fetchCache[cacheKey];
       }
 
       if (typeof value !== 'object') {
@@ -346,7 +380,7 @@
       if (cacheType === 'localStorage') {
         storageWrite(storagePredictionCache, data);
       } else if (cacheType === 'memory') {
-        cacheMemory[cacheKey] = data;
+        fetchCache[cacheKey] = data;
       }
     };
 
@@ -384,18 +418,19 @@
       data.keyValues.ap_ds = statusCode; // eslint-disable-line no-param-reassign
     };
 
+    var ajax = new XMLHttpRequest();
+
     var fetchJSON = function fetchJSON(url, resolve, reject) {
-      debugInfo('Fetching URL:', url);
-      var ajax = new XMLHttpRequest();
+      debugInfo('API request:', url);
 
       ajax.onreadystatechange = function () {
         if (ajax.readyState === XMLHttpRequest.DONE) {
           if (ajax.status === 200) {
             var json = jsonParse(ajax.responseText);
-            debugInfo('Response succeed', json);
+            debugInfo('API response:', json);
             resolve(json);
           } else {
-            debugInfo('Response failed:', ajax);
+            debugInfo('API failed with code:', ajax.status);
             reject();
           }
         }
@@ -404,6 +439,10 @@
       ajax.open('GET', url, true);
       ajax.withCredentials = options.allowPersonalisation;
       ajax.send();
+    };
+
+    var abortJSON = function abortJSON() {
+      ajax.abort();
     };
 
     var readDataFromWeb = function readDataFromWeb(resolve, reject) {
@@ -469,14 +508,14 @@
       return fetchJSON(url, resolve, reject);
     };
 
-    debugInfo('Running promise…');
+    var resolvers = [];
 
-    var getData = function getData(resolve, reject) {
+    var getData = function getData() {
+      fetchStatus.state = fetchStateRunning;
+      delete fetchStatus.result;
+      delete fetchStatus.options;
       var timeout;
       var dataUsed = false;
-      _exports.fetchStatus = fetchStatus = {
-        state: fetchCodeRunning
-      };
 
       var useData = function useData(data, statusCode) {
         if (dataUsed) {
@@ -484,19 +523,21 @@
         }
 
         dataUsed = true;
-        clearTimeout(timeout);
         saveDataStatusKey(data, statusCode.code);
 
         var result = _extends({
           type: statusCode.value
         }, data);
 
-        _exports.fetchStatus = fetchStatus = {
-          state: statusCode.code > 0 ? fetchCodeReady : fetchCodeFailed,
-          options: options,
-          result: result
-        };
-        resolve(result);
+        fetchStatus.state = statusCode.code > 0 ? fetchStateReady : fetchStateFailed;
+        fetchStatus.result = result;
+        fetchStatus.options = options;
+        unuseTimeout(timeout);
+        abortJSON();
+        debugInfo('Callback result:', result);
+        resolvers.forEach(function (resolver) {
+          resolver(result);
+        });
       };
 
       useCmp(function () {
@@ -514,16 +555,20 @@
             useData({}, resultError);
           });
         });
-      }, reject);
+      });
     };
 
     if (typeof callback === 'function') {
-      return getData(callback);
+      resolvers.push(callback);
     }
 
+    getData();
     return {
       promise: function promise() {
-        return new Promise(getData);
+        return new Promise(function (resolve) {
+          debugInfo('Promise called…');
+          resolvers.push(resolve);
+        });
       }
     };
   };
@@ -533,8 +578,13 @@
     moduleName: moduleName,
     packageName: packageName,
     packageVersion: packageVersion,
-    fetch: fetch,
-    fetchStatus: fetchStatus
+    fetchCache: fetchCache,
+    fetchStateInitial: fetchStateInitial,
+    fetchStateRunning: fetchStateRunning,
+    fetchStateReady: fetchStateReady,
+    fetchStateFailed: fetchStateFailed,
+    fetchStatus: fetchStatus,
+    fetch: fetch
   };
   _exports["default"] = _default;
 });
