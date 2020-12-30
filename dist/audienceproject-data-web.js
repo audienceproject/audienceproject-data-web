@@ -356,7 +356,7 @@
         return reject();
       }
 
-      if (value.ttl < currentTimestamp || value.hash !== cacheKey) {
+      if (value.ttl + options.cacheTime < currentTimestamp || value.hash !== cacheKey) {
         debugInfo('Cached prediction expired…');
         return reject();
       }
@@ -373,7 +373,7 @@
       debugInfo('Saving prediction to cache…');
       var data = {
         data: value,
-        ttl: options.cacheTime + currentTimestamp,
+        ttl: currentTimestamp,
         hash: cacheKey
       };
 
@@ -415,7 +415,7 @@
       debugInfo('Updating status fields…');
       data.keyValues = data.keyValues || {}; // eslint-disable-line no-param-reassign
 
-      data.keyValues.ap_ds = statusCode; // eslint-disable-line no-param-reassign
+      data.keyValues.ap_ds = String(statusCode); // eslint-disable-line no-param-reassign
     };
 
     var ajax = new XMLHttpRequest();
