@@ -356,29 +356,6 @@ export const fetch = (customerId, customerOptions, callback) => {
     }
   };
 
-  const resultTimeout = {
-    value: 'TIMEOUT',
-    code: -2,
-  };
-  const resultError = {
-    value: 'BACKEND_ERROR',
-    code: -1,
-  };
-  const resultWeb = options.allowPersonalisation ? {
-    value: 'RETURNED',
-    code: 1,
-  } : {
-    value: 'RETURNED_ANONYMOUS',
-    code: '1a',
-  };
-  const resultCache = options.allowPersonalisation ? {
-    value: 'RETURNED_FROM_CACHE',
-    code: 2,
-  } : {
-    value: 'RETURNED_ANONYMOUS_FROM_CACHE',
-    code: '2a',
-  };
-
   const saveDataStatusKey = (data, statusCode) => {
     if (!options.addStatusKey) {
       return;
@@ -516,6 +493,29 @@ export const fetch = (customerId, customerOptions, callback) => {
     };
 
     useCmp(() => {
+      const resultTimeout = {
+        value: 'TIMEOUT',
+        code: -2,
+      };
+      const resultError = {
+        value: 'BACKEND_ERROR',
+        code: -1,
+      };
+      const resultWeb = options.allowPersonalisation ? {
+        value: 'RETURNED',
+        code: 1,
+      } : {
+        value: 'RETURNED_ANONYMOUS',
+        code: '1a',
+      };
+      const resultCache = options.allowPersonalisation ? {
+        value: 'RETURNED_FROM_CACHE',
+        code: 2,
+      } : {
+        value: 'RETURNED_ANONYMOUS_FROM_CACHE',
+        code: '2a',
+      };
+
       timeout = useTimeout(() => {
         useData({}, resultTimeout);
       });
