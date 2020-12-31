@@ -161,22 +161,25 @@
       return hash;
     };
 
-    var cacheKey = getHash(options.cacheKey.split(',').sort().map(function (key) {
-      if (key === 'url') {
-        return window.location.pathname.slice(1) + window.location.search;
-      }
+    var getCacheKey = function getCacheKey() {
+      return getHash(options.cacheKey.split(/\s,\s/).sort().map(function (key) {
+        if (key === 'url') {
+          return window.location.pathname.slice(1) + window.location.search;
+        }
 
-      if (key === 'allowPersonalisation') {
-        return options.allowPersonalisation ? '' : 0;
-      }
+        if (key === 'allowPersonalisation') {
+          return options.allowPersonalisation ? '' : 0;
+        }
 
-      if (key === 'requestParams') {
-        var string = JSON.stringify(options.requestParams);
-        return string === '{}' ? '' : string;
-      }
+        if (key === 'requestParams') {
+          var string = JSON.stringify(options.requestParams);
+          return string === '{}' ? '' : string;
+        }
 
-      return '';
-    }).join(''));
+        return '';
+      }).join(''));
+    };
+
     var storage = localStorage;
     var storageSessionReferrer = 'apr_sref';
     var storagePredictionCache = 'apr_data_cache';
@@ -334,18 +337,24 @@
     };
 
     var currentTimestamp = Math.round(new Date().getTime() / 1000);
-    var cacheType = options.cacheType === 'localStorage' && !storageCheckAccess() ? 'memory' : options.cacheType;
+
+    var getCacheType = function getCacheType() {
+      return options.cacheType === 'localStorage' && !storageCheckAccess() ? 'memory' : options.cacheType;
+    };
 
     var readDataFromCache = function readDataFromCache(resolve, reject) {
+      var cacheType = getCacheType();
+
       if (!cacheType) {
         return reject();
       }
 
       debugInfo('Reading prediction from cache…');
       var value;
+      var cacheKey = getCacheKey();
 
       if (cacheType === 'localStorage') {
-        debugInfo('Reading prediction from local storage key:', storagePredictionCache);
+        debugInfo('Reading prediction from local storage key:', cacheKey);
         value = storageRead(storagePredictionCache);
       } else if (cacheType === 'memory') {
         debugInfo('Reading prediction from memory key:', cacheKey);
@@ -366,11 +375,14 @@
     };
 
     var saveDataToCache = function saveDataToCache(value) {
+      var cacheType = getCacheType();
+
       if (!cacheType) {
         return;
       }
 
       debugInfo('Saving prediction to cache…');
+      var cacheKey = getCacheKey();
       var data = {
         data: value,
         ttl: currentTimestamp,
