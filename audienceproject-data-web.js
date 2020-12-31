@@ -137,7 +137,7 @@ export const fetch = (customerId, customerOptions, callback) => {
     return hash;
   };
 
-  const cacheKey = getHash(options.cacheKey.split(',').sort().map((key) => {
+  const getCacheKey = () => getHash(options.cacheKey.split(/\s,\s/).sort().map((key) => {
     if (key === 'url') {
       return window.location.pathname.slice(1) + window.location.search;
     }
@@ -304,9 +304,10 @@ export const fetch = (customerId, customerOptions, callback) => {
 
   const currentTimestamp = Math.round(new Date().getTime() / 1000);
 
-  const cacheType = options.cacheType === 'localStorage' && !storageCheckAccess() ? 'memory' : options.cacheType;
+  const getCacheType = () => (options.cacheType === 'localStorage' && !storageCheckAccess() ? 'memory' : options.cacheType);
 
   const readDataFromCache = (resolve, reject) => {
+    const cacheType = getCacheType();
     if (!cacheType) {
       return reject();
     }
@@ -314,9 +315,10 @@ export const fetch = (customerId, customerOptions, callback) => {
     debugInfo('Reading prediction from cache…');
 
     let value;
+    const cacheKey = getCacheKey();
 
     if (cacheType === 'localStorage') {
-      debugInfo('Reading prediction from local storage key:', storagePredictionCache);
+      debugInfo('Reading prediction from local storage key:', cacheKey);
       value = storageRead(storagePredictionCache);
     } else if (cacheType === 'memory') {
       debugInfo('Reading prediction from memory key:', cacheKey);
@@ -337,12 +339,14 @@ export const fetch = (customerId, customerOptions, callback) => {
   };
 
   const saveDataToCache = (value) => {
+    const cacheType = getCacheType();
     if (!cacheType) {
       return;
     }
 
     debugInfo('Saving prediction to cache…');
 
+    const cacheKey = getCacheKey();
     const data = {
       data: value,
       ttl: currentTimestamp,
