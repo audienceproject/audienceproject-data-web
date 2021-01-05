@@ -137,7 +137,7 @@ export const fetch = (customerId, customerOptions, callback) => {
     return hash;
   };
 
-  const getCacheKey = () => getHash(options.cacheKey.split(/\s,\s/).sort().map((key) => {
+  const getCacheKey = () => getHash(options.cacheKey.split(/\s*,\s*/).sort().map((key) => {
     if (key === 'url') {
       return window.location.pathname.slice(1) + window.location.search;
     }
