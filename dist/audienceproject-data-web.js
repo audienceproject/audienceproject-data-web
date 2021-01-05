@@ -162,7 +162,7 @@
     };
 
     var getCacheKey = function getCacheKey() {
-      return getHash(options.cacheKey.split(/\s,\s/).sort().map(function (key) {
+      return getHash(options.cacheKey.split(/\s*,\s*/).sort().map(function (key) {
         if (key === 'url') {
           return window.location.pathname.slice(1) + window.location.search;
         }
