@@ -22,7 +22,7 @@
   _exports.moduleName = moduleName;
   var packageName = '@audienceproject/data-web';
   _exports.packageName = packageName;
-  var packageVersion = '1.0.2';
+  var packageVersion = '1.0.3';
   _exports.packageVersion = packageVersion;
   var fetchCache = {};
   _exports.fetchCache = fetchCache;
