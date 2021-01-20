@@ -1,7 +1,7 @@
 export const moduleName = 'AudienceProjectData';
 
 export const packageName = '@audienceproject/data-web';
-export const packageVersion = '1.0.3';
+export const packageVersion = '1.0.4';
 
 export const fetchCache = {};
 
