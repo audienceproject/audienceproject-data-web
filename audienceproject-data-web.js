@@ -432,6 +432,10 @@ export const fetch = (customerId, customerOptions, callback) => {
     (function walk(data, prefix) {
       Object.keys(data).forEach((key) => {
         const value = data[key];
+        if (value === undefined) {
+          return;
+        }
+
         const subKey = prefix + key;
 
         if (isArray(value)) {

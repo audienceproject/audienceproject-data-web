@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https://pdw-usr.userreport.com https://dnt-userreport.com">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'unsafe-inline'; connect-src https://pdw-usr.userreport.com https://dnt-userreport.com">
 
 <title>AudienceProject Data Web Test</title>
 <h2>AudienceProject Data Web Test</h2>
@@ -160,8 +160,12 @@
         value = Number(value);
         defaultValue = Number(defaultValue);
       } else if (node.getAttribute('data-type') === 'json') {
-        value = JSON.parse(value);
-        defaultValue = JSON.parse(defaultValue);
+        var parse = function (value){
+          return Function('"use strict";return (' + value + ')')();
+        };
+
+        value = parse(value);
+        defaultValue = parse(defaultValue);
       }
 
       options[node.id.split('-').pop()] = value;
