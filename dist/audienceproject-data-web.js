@@ -22,7 +22,7 @@
   _exports.moduleName = moduleName;
   var packageName = '@audienceproject/data-web';
   _exports.packageName = packageName;
-  var packageVersion = '1.0.3';
+  var packageVersion = '1.0.4';
   _exports.packageVersion = packageVersion;
   var fetchCache = {};
   _exports.fetchCache = fetchCache;
@@ -473,6 +473,11 @@
       (function walk(data, prefix) {
         Object.keys(data).forEach(function (key) {
           var value = data[key];
+
+          if (value === undefined) {
+            return;
+          }
+
           var subKey = prefix + key;
 
           if (isArray(value)) {
