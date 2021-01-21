@@ -77,6 +77,29 @@ export const fetch = (customerId, customerOptions, callback) => {
     throw new Error('Invalid customer ID');
   }
 
+  const getUserOptions = () => {
+    const key = '__audienceProjectDataFetchOptions=';
+
+    const parts = window.location.search.split(/[?&]/);
+    let data;
+
+    parts.some((part) => {
+      const matches = part.indexOf(key) === 0;
+
+      if (matches) {
+        const value = part.slice(key.length);
+
+        try {
+          data = JSON.parse(decodeURIComponent(value));
+        } catch (error) {} // eslint-disable-line no-empty
+      }
+
+      return matches;
+    });
+
+    return data;
+  };
+
   const options = {
     allowStorageAccess: true,
     allowPersonalisation: true,
@@ -104,6 +127,7 @@ export const fetch = (customerId, customerOptions, callback) => {
     debug: false,
 
     ...customerOptions,
+    ...getUserOptions(),
   };
 
   const debugInfo = (...args) => options.debug && console?.log(`[${moduleName}]`, ...args); // eslint-disable-line no-console, compat/compat
