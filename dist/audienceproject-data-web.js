@@ -22,7 +22,7 @@
   _exports.moduleName = moduleName;
   var packageName = '@audienceproject/data-web';
   _exports.packageName = packageName;
-  var packageVersion = '1.0.4';
+  var packageVersion = '1.0.5';
   _exports.packageVersion = packageVersion;
   var fetchCache = {};
   _exports.fetchCache = fetchCache;
@@ -102,6 +102,27 @@
       throw new Error('Invalid customer ID');
     }
 
+    var getUserOptions = function getUserOptions() {
+      var key = '__audienceProjectDataFetchOptions=';
+      var parts = window.location.search.split(/[?&]/);
+      var data;
+      parts.some(function (part) {
+        var matches = part.indexOf(key) === 0;
+
+        if (matches) {
+          var value = part.slice(key.length);
+
+          try {
+            data = JSON.parse(decodeURIComponent(value));
+          } catch (error) {} // eslint-disable-line no-empty
+
+        }
+
+        return matches;
+      });
+      return data;
+    };
+
     var options = _extends({
       allowStorageAccess: true,
       allowPersonalisation: true,
@@ -121,7 +142,7 @@
         nonPersonalised: 'dnt-userreport.com'
       },
       debug: false
-    }, customerOptions);
+    }, customerOptions, getUserOptions());
 
     var debugInfo = function debugInfo() {
       var _console;
