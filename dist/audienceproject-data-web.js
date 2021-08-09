@@ -22,7 +22,7 @@
   _exports.moduleName = moduleName;
   var packageName = '@audienceproject/data-web';
   _exports.packageName = packageName;
-  var packageVersion = '1.0.5';
+  var packageVersion = '1.1.0';
   _exports.packageVersion = packageVersion;
   var fetchCache = {};
   _exports.fetchCache = fetchCache;
@@ -104,7 +104,8 @@
 
     var getUserOptions = function getUserOptions() {
       var key = '__audienceProjectDataFetchOptions=';
-      var parts = window.location.search.split(/[?&]/);
+      var parts = window.location.search.split(/[?&]/); // eslint-disable-line compat/compat
+
       var data;
       parts.some(function (part) {
         var matches = part.indexOf(key) === 0;
@@ -304,7 +305,7 @@
       };
 
       var listenExplicitConsent = function listenExplicitConsent(updatedModel) {
-        if (updatedModel.tcString) {
+        if (updatedModel.eventStatus === 'tcloaded' || updatedModel.eventStatus === 'useractioncomplete') {
           callTcf('removeEventListener', listenExplicitConsent);
           overrideOptions(updatedModel);
           resolve();
@@ -312,7 +313,7 @@
       };
 
       var listenResponse = function listenResponse(model) {
-        if (!options.waitForCmpConsent || !model.gdprApplies || model.tcString) {
+        if (!options.waitForCmpConsent || !model.gdprApplies || model.eventStatus === 'tcloaded' || model.eventStatus === 'useractioncomplete') {
           overrideOptions(model);
           resolve();
           return;
