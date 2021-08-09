@@ -184,8 +184,13 @@
   </label>
 
   <label class="offset">
-    <input id="page-options-tcf-explicit" type="checkbox">
-    Consent is given on first request
+    <input id="page-options-tcf-string" type="checkbox">
+    Consent string is present
+  </label>
+
+  <label class="offset">
+    <input id="page-options-tcf-dialog" type="checkbox">
+    Consent dialog is completed
   </label>
 
   <label class="offset">
@@ -221,34 +226,28 @@
     var mock = function (command, version, callback, arguments) {
       console.log('[Test Page] TCF call:', command, arguments);
 
-      var explicit = document.getElementById('page-options-tcf-explicit').checked;
+      if (command !== 'getTCData' && command !== 'addEventListener') {
+        return;
+      }
 
-      if (command === 'getTCData' && !explicit) {
+      setTimeout(function () {
         callback({
           gdprApplies: true,
-          tcString: ''
-        }, true);
-      } else
-
-      if ((command === 'getTCData' && explicit) || command === 'addEventListener') {
-        setTimeout(function () {
-          callback({
-            gdprApplies: true,
-            tcString: 'abc',
-            purpose: {
-              consents: {
-                1: document.getElementById('page-options-tcf-storage').checked,
-                3: document.getElementById('page-options-tcf-personalization').checked
-              }
-            },
-            vendor: {
-              consents: {
-                394: document.getElementById('page-options-tcf-vendor').checked
-              }
+          eventStatus: document.getElementById('page-options-tcf-dialog').checked ? 'useractioncomplete' : 'cmpuishown',
+          tcString: document.getElementById('page-options-tcf-string').checked ? 'abc' : '',
+          purpose: {
+            consents: {
+              1: document.getElementById('page-options-tcf-storage').checked,
+              3: document.getElementById('page-options-tcf-personalization').checked
             }
-          }, true);
-        }, 1000);
-      }
+          },
+          vendor: {
+            consents: {
+              394: document.getElementById('page-options-tcf-vendor').checked
+            }
+          }
+        }, true);
+      }, 1000);
     };
 
     node.onclick = function () {

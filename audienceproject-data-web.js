@@ -80,7 +80,7 @@ export const fetch = (customerId, customerOptions, callback) => {
   const getUserOptions = () => {
     const key = '__audienceProjectDataFetchOptions=';
 
-    const parts = window.location.search.split(/[?&]/);
+    const parts = window.location.search.split(/[?&]/); // eslint-disable-line compat/compat
     let data;
 
     parts.some((part) => {
@@ -272,7 +272,7 @@ export const fetch = (customerId, customerOptions, callback) => {
     };
 
     const listenExplicitConsent = (updatedModel) => {
-      if (updatedModel.tcString) {
+      if (updatedModel.eventStatus === 'tcloaded' || updatedModel.eventStatus === 'useractioncomplete') {
         callTcf('removeEventListener', listenExplicitConsent);
 
         overrideOptions(updatedModel);
@@ -281,7 +281,8 @@ export const fetch = (customerId, customerOptions, callback) => {
     };
 
     const listenResponse = (model) => {
-      if (!options.waitForCmpConsent || !model.gdprApplies || model.tcString) {
+      if (!options.waitForCmpConsent || !model.gdprApplies
+          || model.eventStatus === 'tcloaded' || model.eventStatus === 'useractioncomplete') {
         overrideOptions(model);
         resolve();
         return;
