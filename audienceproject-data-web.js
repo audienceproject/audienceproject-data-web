@@ -1,7 +1,7 @@
 export const moduleName = 'AudienceProjectData';
 
 export const packageName = '@audienceproject/data-web';
-export const packageVersion = '1.1.0';
+export const packageVersion = '1.1.1';
 
 export const fetchCache = {};
 
@@ -584,6 +584,18 @@ export const fetch = (customerId, customerOptions, callback) => {
   };
 };
 
+export const utils = {
+  sendDataToGooglePublisherTag: (data) => {
+    window.googletag = window.googletag || { cmd: [] };
+
+    window.googletag.cmd.push(() => {
+      Object.keys(data.keyValues).forEach((key) => {
+        window.googletag.pubads().setTargeting(key, data.keyValues[key]);
+      });
+    });
+  },
+};
+
 export default {
   moduleName,
 
@@ -600,4 +612,5 @@ export default {
   fetchStatus,
 
   fetch,
+  utils,
 };

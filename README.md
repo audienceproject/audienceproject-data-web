@@ -49,7 +49,9 @@ AudienceProjectData.fetch(customerId, options, callback);
 Promise based:
 
 ```javascript
-AudienceProjectData.fetch(customerId, options).promise().then(/* callback */).catch(/* callback */);
+AudienceProjectData.fetch(customerId).promise()
+    .then(callbackSuccess)
+    .catch(callbackError);
 ```
 
 #### Arguments
@@ -73,6 +75,14 @@ AudienceProjectData.fetch(customerId, options).promise().then(/* callback */).ca
 * `options.requestDomains.nonPersonalised='dnt-userreport.com'` *(Object)*: Request domain for non-personalised requests.
 * `options.debug=false` *(boolean)*: Enable debug logging.
 * `callback` *(Function)*: Optional callback handler.
+
+### Utils
+
+#### Send data to Google Publisher Tag
+
+```javascript
+AudienceProjectData.fetch(customerId, options, AudienceProjectData.utils.sendDataToGooglePublisherTag);
+```
 
 ## Compatibility
 

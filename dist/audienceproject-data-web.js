@@ -14,7 +14,7 @@
   "use strict";
 
   _exports.__esModule = true;
-  _exports["default"] = _exports.fetch = _exports.fetchStatus = _exports.fetchStateFailed = _exports.fetchStateReady = _exports.fetchStateRunning = _exports.fetchStateInitial = _exports.fetchCache = _exports.packageVersion = _exports.packageName = _exports.moduleName = void 0;
+  _exports.utils = _exports.packageVersion = _exports.packageName = _exports.moduleName = _exports.fetchStatus = _exports.fetchStateRunning = _exports.fetchStateReady = _exports.fetchStateInitial = _exports.fetchStateFailed = _exports.fetchCache = _exports.fetch = _exports["default"] = void 0;
 
   function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
@@ -22,7 +22,7 @@
   _exports.moduleName = moduleName;
   var packageName = '@audienceproject/data-web';
   _exports.packageName = packageName;
-  var packageVersion = '1.1.0';
+  var packageVersion = '1.1.1';
   _exports.packageVersion = packageVersion;
   var fetchCache = {};
   _exports.fetchCache = fetchCache;
@@ -612,6 +612,19 @@
   };
 
   _exports.fetch = fetch;
+  var utils = {
+    sendDataToGooglePublisherTag: function sendDataToGooglePublisherTag(data) {
+      window.googletag = window.googletag || {
+        cmd: []
+      };
+      window.googletag.cmd.push(function () {
+        Object.keys(data.keyValues).forEach(function (key) {
+          window.googletag.pubads().setTargeting(key, data.keyValues[key]);
+        });
+      });
+    }
+  };
+  _exports.utils = utils;
   var _default = {
     moduleName: moduleName,
     packageName: packageName,
@@ -622,7 +635,8 @@
     fetchStateReady: fetchStateReady,
     fetchStateFailed: fetchStateFailed,
     fetchStatus: fetchStatus,
-    fetch: fetch
+    fetch: fetch,
+    utils: utils
   };
   _exports["default"] = _default;
 });

@@ -209,6 +209,11 @@
   </label>
 
   <label>
+    <input id="page-options-gpt" type="checkbox">
+    Use Google Publisher Tag API
+  </label>
+
+  <label>
     <input id="page-options-localstorage" type="checkbox">
     Freeze local storage
   </label>
@@ -255,6 +260,52 @@
         window.__tcfapi = mock;
       } else {
         delete window.__tcfapi;
+      }
+    }
+
+    node.onclick();
+  })();
+
+  (function () {
+    var node = document.getElementById('page-options-gpt');
+
+    var cmd = [];
+    const cmdPush = cmd.push.bind(cmd);
+    cmd.push = (callback) => {
+      cmdPush(callback);
+      callback();
+    }
+
+    var pubads = {
+      _targeting: {},
+    };
+    pubads.clearTargeting = (key) => {
+      if (key) {
+        delete pubads._targeting[key];
+      } else {
+        pubads._targeting = {};
+      }
+    };
+    pubads.getTargeting = (key) => {
+      return pubads._targeting[key];
+    };
+    pubads.getTargetingKeys = (key) => {
+      return Object.keys(pubads._targeting[key]);
+    };
+    pubads.setTargeting = (key, value) => {
+      pubads._targeting[key] = value;
+    };
+
+    var mock = {
+      cmd,
+      pubads: () => pubads,
+    };
+
+    node.onclick = function () {
+      if (node.checked) {
+        window.googletag = mock;
+      } else {
+        delete window.googletag;
       }
     }
 
