@@ -236,8 +236,6 @@ export const fetch = (customerId, customerOptions, callback) => {
 
     if (typeof __tcfapi !== 'function') {
       debugInfo('No TCF 2.0 API found…');
-
-      resolve();
       return;
     }
 
