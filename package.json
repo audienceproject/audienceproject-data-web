@@ -1,6 +1,6 @@
 {
   "name": "@audienceproject/data-web",
-  "version": "1.1.1",
+  "version": "1.3.0",
   "description": "AudienceProject Data services for your websites",
   "main": "dist/audienceproject-data-web.js",
   "type": "module",

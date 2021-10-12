@@ -22,7 +22,7 @@
   _exports.moduleName = moduleName;
   var packageName = '@audienceproject/data-web';
   _exports.packageName = packageName;
-  var packageVersion = '1.1.1';
+  var packageVersion = '1.3.0';
   _exports.packageVersion = packageVersion;
   var fetchCache = {};
   _exports.fetchCache = fetchCache;
@@ -267,7 +267,6 @@
 
       if (typeof __tcfapi !== 'function') {
         debugInfo('No TCF 2.0 API found…');
-        resolve();
         return;
       }
 
@@ -617,11 +616,20 @@
       window.googletag = window.googletag || {
         cmd: []
       };
-      window.googletag.cmd.push(function () {
+
+      var setTargeting = function setTargeting() {
         Object.keys(data.keyValues).forEach(function (key) {
           window.googletag.pubads().setTargeting(key, data.keyValues[key]);
         });
-      });
+      };
+
+      if (window.googletag.cmd.unshift) {
+        // put in front of queue when possible
+        window.googletag.cmd.unshift(setTargeting);
+      } else {
+        // native array method is not available if queue was processed
+        window.googletag.cmd.push(setTargeting);
+      }
     }
   };
   _exports.utils = utils;
