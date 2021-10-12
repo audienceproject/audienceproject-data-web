@@ -588,11 +588,17 @@ export const utils = {
   sendDataToGooglePublisherTag: (data) => {
     window.googletag = window.googletag || { cmd: [] };
 
-    window.googletag.cmd.push(() => {
+    const setTargeting = () => {
       Object.keys(data.keyValues).forEach((key) => {
         window.googletag.pubads().setTargeting(key, data.keyValues[key]);
       });
-    });
+    };
+
+    if (window.googletag.cmd.unshift) { // put in front of queue when possible
+      window.googletag.cmd.unshift(setTargeting);
+    } else { // native array method is not available if queue was processed
+      window.googletag.cmd.push(setTargeting);
+    }
   },
 };
 
