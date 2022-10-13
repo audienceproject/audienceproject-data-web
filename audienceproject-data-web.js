@@ -510,7 +510,7 @@ export const fetch = (customerId, customerOptions, callback) => {
         ...data,
       };
 
-      fetchStatus.state = statusCode.code > 0 ? fetchStateReady : fetchStateFailed;
+      fetchStatus.state = parseInt(statusCode.code, 10) > 0 ? fetchStateReady : fetchStateFailed;
       fetchStatus.result = result;
       fetchStatus.options = options;
 
