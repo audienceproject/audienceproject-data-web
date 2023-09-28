@@ -16,23 +16,15 @@
   _exports.__esModule = true;
   _exports.utils = _exports.packageVersion = _exports.packageName = _exports.moduleName = _exports.fetchStatus = _exports.fetchStateRunning = _exports.fetchStateReady = _exports.fetchStateInitial = _exports.fetchStateFailed = _exports.fetchCache = _exports.fetch = _exports["default"] = void 0;
   function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
-  var moduleName = 'AudienceProjectData';
-  _exports.moduleName = moduleName;
-  var packageName = '@audienceproject/data-web';
-  _exports.packageName = packageName;
-  var packageVersion = '1.3.1';
-  _exports.packageVersion = packageVersion;
-  var fetchCache = {};
-  _exports.fetchCache = fetchCache;
-  var fetchStateInitial = 'INITIAL';
-  _exports.fetchStateInitial = fetchStateInitial;
-  var fetchStateRunning = 'RUNNING';
-  _exports.fetchStateRunning = fetchStateRunning;
-  var fetchStateReady = 'READY';
-  _exports.fetchStateReady = fetchStateReady;
-  var fetchStateFailed = 'FAILED';
-  _exports.fetchStateFailed = fetchStateFailed;
-  var fetchStatus = {
+  var moduleName = _exports.moduleName = 'AudienceProjectData';
+  var packageName = _exports.packageName = '@audienceproject/data-web';
+  var packageVersion = _exports.packageVersion = '1.4.0';
+  var fetchCache = _exports.fetchCache = {};
+  var fetchStateInitial = _exports.fetchStateInitial = 'INITIAL';
+  var fetchStateRunning = _exports.fetchStateRunning = 'RUNNING';
+  var fetchStateReady = _exports.fetchStateReady = 'READY';
+  var fetchStateFailed = _exports.fetchStateFailed = 'FAILED';
+  var fetchStatus = _exports.fetchStatus = {
     state: fetchStateInitial
   };
 
@@ -93,8 +85,8 @@
    *
    * @returns {Object}
    */
-  _exports.fetchStatus = fetchStatus;
-  var fetch = function fetch(customerId, customerOptions, callback) {
+
+  var fetch = _exports.fetch = function fetch(customerId, customerOptions, callback) {
     if (typeof customerId !== 'string' || !customerId) {
       throw new Error('Invalid customer ID');
     }
@@ -229,10 +221,10 @@
       }
       debugInfo('Checking CMP…');
       if (typeof __tcfapi !== 'function') {
-        debugInfo('No TCF 2.0 API found…');
+        debugInfo('No TCF 2.2 API found…');
         return;
       }
-      debugInfo('Using TCF 2.0 API…');
+      debugInfo('Using TCF 2.2 API…');
       var vendorId = 394;
       var overrideOptions = function overrideOptions(model) {
         options.gdprApplies = Boolean(model.gdprApplies);
@@ -258,23 +250,16 @@
           handler.apply(void 0, args);
         }, vendorIds);
       };
-      var listenExplicitConsent = function listenExplicitConsent(updatedModel) {
+      var listenExplicitConsent = function listenExplicitConsent(updatedModel, success) {
+        if (!success) return;
         if (updatedModel.eventStatus === 'tcloaded' || updatedModel.eventStatus === 'useractioncomplete') {
           callTcf('removeEventListener', listenExplicitConsent);
           overrideOptions(updatedModel);
           resolve();
         }
       };
-      var listenResponse = function listenResponse(model) {
-        if (!options.waitForCmpConsent || !model.gdprApplies || model.eventStatus === 'tcloaded' || model.eventStatus === 'useractioncomplete') {
-          overrideOptions(model);
-          resolve();
-          return;
-        }
-        debugInfo('Adding TCF consent listener…');
-        callTcf('addEventListener', listenExplicitConsent);
-      };
-      callTcf('getTCData', listenResponse);
+      debugInfo('Adding TCF consent listener…');
+      callTcf('addEventListener', listenExplicitConsent);
     };
     var timeoutStart;
     var useTimeout = function useTimeout(resolve) {
@@ -511,8 +496,7 @@
       }
     };
   };
-  _exports.fetch = fetch;
-  var utils = {
+  var utils = _exports.utils = {
     sendDataToGooglePublisherTag: function sendDataToGooglePublisherTag(data) {
       window.googletag = window.googletag || {
         cmd: []
@@ -531,8 +515,7 @@
       }
     }
   };
-  _exports.utils = utils;
-  var _default = {
+  var _default = _exports["default"] = {
     moduleName: moduleName,
     packageName: packageName,
     packageVersion: packageVersion,
@@ -545,5 +528,4 @@
     fetch: fetch,
     utils: utils
   };
-  _exports["default"] = _default;
 });
