@@ -235,11 +235,11 @@ export const fetch = (customerId, customerOptions, callback) => {
     debugInfo('Checking CMP…');
 
     if (typeof __tcfapi !== 'function') {
-      debugInfo('No TCF 2.0 API found…');
+      debugInfo('No TCF 2.2 API found…');
       return;
     }
 
-    debugInfo('Using TCF 2.0 API…');
+    debugInfo('Using TCF 2.2 API…');
 
     const vendorId = 394;
 
@@ -269,7 +269,9 @@ export const fetch = (customerId, customerOptions, callback) => {
       );
     };
 
-    const listenExplicitConsent = (updatedModel) => {
+    const listenExplicitConsent = (updatedModel, success) => {
+      if (!success) return;
+
       if (updatedModel.eventStatus === 'tcloaded' || updatedModel.eventStatus === 'useractioncomplete') {
         callTcf('removeEventListener', listenExplicitConsent);
 
@@ -278,19 +280,8 @@ export const fetch = (customerId, customerOptions, callback) => {
       }
     };
 
-    const listenResponse = (model) => {
-      if (!options.waitForCmpConsent || !model.gdprApplies
-          || model.eventStatus === 'tcloaded' || model.eventStatus === 'useractioncomplete') {
-        overrideOptions(model);
-        resolve();
-        return;
-      }
-
-      debugInfo('Adding TCF consent listener…');
-      callTcf('addEventListener', listenExplicitConsent);
-    };
-
-    callTcf('getTCData', listenResponse);
+    debugInfo('Adding TCF consent listener…');
+    callTcf('addEventListener', listenExplicitConsent);
   };
 
   let timeoutStart;

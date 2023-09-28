@@ -181,7 +181,7 @@
 
   <label>
     <input id="page-options-tcf" type="checkbox">
-    Use TCF 2.0 API
+    Use TCF 2.2 API
   </label>
 
   <label class="offset">
@@ -232,7 +232,7 @@
     var mock = function (command, version, callback, arguments) {
       console.log('[Test Page] TCF call:', command, arguments);
 
-      if (command !== 'getTCData' && command !== 'addEventListener') {
+      if (command !== 'addEventListener') {
         return;
       }
 
